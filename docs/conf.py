@@ -28,12 +28,6 @@ author = u'Christer van der Meeren'
 copyright = '{0}, {1}'.format(year, author)
 version = release = u'0.9'
 
-import sphinx_py3doc_enhanced_theme
-#html_theme = "sphinx_py3doc_enhanced_theme"
-#html_theme_path = [sphinx_py3doc_enhanced_theme.get_html_theme_path()]
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
 pygments_style = 'trac'
 templates_path = ['.']
 html_use_smartypants = True
