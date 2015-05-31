@@ -1,0 +1,53 @@
+{
+    "encoding": "utf-8",
+    "latexdiff_args": "NOTUSED",
+    "git_force_unix_pathsep": true,
+    "ref_single_word": false,
+    "bib": {
+        "max_authors": 0,
+        "sep_authors_first": "NOTUSED",
+        "author_serialcomma": true,
+        "sep_authors_last": "NOTUSED",
+        "et_al": "NOTUSED"
+    },
+    "bbl": {
+        "regex": "NOTUSED",
+        "author": "NOTUSED",
+        "year": "NOTUSED"
+    },
+    "cmd_format": {
+        "citep": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%NUMERIC%",
+            "sep_author_year": "",
+            "year": "",
+            "sep_same_author_year": "",
+            "sep_ref": ", ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        },
+        "citet": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%NUMERIC%",
+            "sep_author_year": "",
+            "year": "",
+            "sep_same_author_year": "",
+            "sep_ref": ", ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        },
+        "cite": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%NUMERIC%",
+            "sep_author_year": "",
+            "year": "",
+            "sep_same_author_year": "",
+            "sep_ref": ", ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        }
+    }
+}
