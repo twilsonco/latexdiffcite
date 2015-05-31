@@ -715,7 +715,7 @@ def create_parser():
                                      description='Replaces \\cite{} commands in two files with properly formatted '
                                                  'references and calls latexdiff on the result')
 
-    parser.add_argument('-V', '--version', action='version', version='latexdiff-cite version {}'.format(__version__))
+    parser.add_argument('-V', '--version', action='version', version='latexdiffcite version {}'.format(__version__))
 
     # add subparsers: file, git, test
     subparsers = parser.add_subparsers(title='Subcommands', description='for help, run %(prog)s SUBCOMMAND -h')
@@ -730,7 +730,7 @@ def create_parser():
     for p in [parser_file, parser_git]:
         p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='show debug log on screen')
         p.add_argument('-l', '--log', dest='log', metavar='LOGFILE', nargs='?', default=False,
-                       const='latexdiff-cite.log', help='enable logging to LOGFILE, default %(const)s')
+                       const='latexdiffcite.log', help='enable logging to LOGFILE, default %(const)s')
         p.add_argument('-s', '--silent', dest='silent', action='store_true', default=False, help='only show warnings on screen')
         p.add_argument('-o', '--output', dest='file_out', metavar='FILE_OUT',
                        default='diff.tex', help='output file, default %(default)s')
