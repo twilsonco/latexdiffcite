@@ -2,7 +2,6 @@
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import os
-import sys
 import platform
 import itertools
 import subprocess
@@ -53,7 +52,7 @@ def reset_everything():
 def mock_git_show(fname, rev):
     '''Replacement for git_show for testing purposes'''
     if platform.system() == 'Windows':
-        cmd = 'type' 
+        cmd = 'type'
         shell = True
     else:
         cmd = 'cat'
@@ -62,13 +61,6 @@ def mock_git_show(fname, rev):
     stdout, _ = p.communicate()
     return stdout
 
-
-def setup():
-    reset_everything()
-
-
-def teardown():
-    latexdiffcite.Files.destroy_tempfiles()
 
 parser = latexdiffcite.create_parser()
 
@@ -315,23 +307,31 @@ for testcase, enc, mode, eol in parameters:
     ids.append('{}_{}_{}_{}'.format(testcase, enc, mode, eol))
 
 
-@pytest.mark.parametrize('testcase, enc, mode, eol', parameters, ids=ids)
-def test_case(mocker, testcase, enc, mode, eol):
-    mocker.patch('latexdiffcite.latexdiffcite.git_show', side_effect=mock_git_show)
-    mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
-    mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
-    folder = '{}_{}_{}'.format(encs[enc]['acc'], encs[enc]['f_enc'], eol)
-    args = testcases[testcase]['template_args_' + mode].replace('%FILE%', os.path.join(folder, 'test.tex')).split()
-    parsed_args = parser.parse_args(args)
-    latexdiffcite.initiate_from_args(parsed_args)
-    latexdiffcite.Config.encoding = encs[enc]['enc']
-    parsed_args.func(parsed_args)
-    latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
-    latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
-    out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
-    out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
-    assert out_old == testcases[testcase]['out_' + encs[enc]['acc']]
-    assert out_new == testcases[testcase]['out_' + encs[enc]['acc']]
+class TestFromInputToOutput():
+
+    @pytest.mark.parametrize('testcase, enc, mode, eol', parameters, ids=ids)
+    def test_case(self, mocker, testcase, enc, mode, eol):
+        mocker.patch('latexdiffcite.latexdiffcite.git_show', side_effect=mock_git_show)
+        mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
+        mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
+        folder = '{}_{}_{}'.format(encs[enc]['acc'], encs[enc]['f_enc'], eol)
+        args = testcases[testcase]['template_args_' + mode].replace('%FILE%', os.path.join(folder, 'test.tex')).split()
+        parsed_args = parser.parse_args(args)
+        latexdiffcite.initiate_from_args(parsed_args)
+        latexdiffcite.Config.encoding = encs[enc]['enc']
+        parsed_args.func(parsed_args)
+        latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
+        latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
+        out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
+        out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
+        assert out_old == testcases[testcase]['out_' + encs[enc]['acc']]
+        assert out_new == testcases[testcase]['out_' + encs[enc]['acc']]
+
+    def setup(self):
+        reset_everything()
+
+    def teardown(self):
+        latexdiffcite.Files.destroy_tempfiles()
 
 
 def test_format_authorlist_with_serialcomma(mocker):
@@ -372,3 +372,9 @@ def test_custom_cite_command(mocker):
     latexdiffcite.Config.cmd_format = {'custom_cite': 'foo'}
     latexdiffcite.get_all_ref_keys('new')
     assert latexdiffcite.References.refkeys_new == ['foo', 'bar']
+
+
+def test_command_available():
+    p = subprocess.Popen(['latexdiffcite', '--version'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
