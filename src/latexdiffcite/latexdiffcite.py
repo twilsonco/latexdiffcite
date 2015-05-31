@@ -21,9 +21,9 @@ __version__ = '1.0.0'
 log = logging.getLogger(__name__)
 
 
-#==============================================================================
-### Classes to hold "global" variables during runtime
-#==============================================================================
+# ==============================================================================
+#  Classes to hold "global" variables during runtime
+# ==============================================================================
 
 
 class Config(object):
@@ -144,9 +144,9 @@ class FileContents(object):
     bbl_new = ''
 
 
-#==============================================================================
-### Functions
-#==============================================================================
+# ==============================================================================
+#  Functions
+# ==============================================================================
 
 
 def run_main_file(args):
@@ -440,7 +440,7 @@ def make_author_year_tokens_from_bib(oldnew):
             p = re.compile(r'^\s*@\s*\w+\s*\{\s*' + ref + r'\s*,.*?^\}', re.S | re.M)
             entry = re.findall(p, bib_contents)[0]
 
-            #--- AUTHOR
+            # AUTHOR
 
             # find author list in entry and create author string
             author_re = re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S)
@@ -466,7 +466,7 @@ def make_author_year_tokens_from_bib(oldnew):
             else:
                 name = format_authorlist(surnames)
 
-            #--- YEAR
+            # YEAR
 
             # find year in entry and create year string
             year_re = re.compile(r'\s*year\s*=\s*["{]?\s*(\d+)\s*["}]?', flags=re.IGNORECASE)
@@ -626,7 +626,7 @@ def format_refs(oldnew, replace_refs, cite_cmd, prenote, postnote):
             out += ldiffstart
             ldiff_author = True
 
-        #--- AUTHOR
+        # AUTHOR
         # replace capture groups, %AUTHOR% token and %NUMERIC% token
         author = fmt['author']
         author = replace_capture_groups(author, ref, oldnew)
@@ -637,7 +637,7 @@ def format_refs(oldnew, replace_refs, cite_cmd, prenote, postnote):
         # author-year separator
         out += fmt['sep_author_year']
 
-        #--- YEAR
+        # YEAR
         # replace capture groups
         year = fmt['year']
         year = replace_capture_groups(year, ref, oldnew)
