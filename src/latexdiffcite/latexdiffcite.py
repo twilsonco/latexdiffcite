@@ -16,7 +16,7 @@ import subprocess
 
 import io
 
-__version__ = '1.0.0'
+__version__ = '0.9'
 
 log = logging.getLogger(__name__)
 
