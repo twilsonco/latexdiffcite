@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='latexdiffcite',
-    version='0.9',
+    version='0.9.0',
     license='BSD',
     description='Wrapper around latexdiff to make citations diff properly',
     long_description='%s\n%s' % (read('README.rst'), re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))),
