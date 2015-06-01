@@ -117,7 +117,7 @@ class Files(object):
     def create_tempfiles():
         for rev in ['new', 'old']:
             tmpfile = tempfile.NamedTemporaryFile(delete=False, prefix='tmp_' + rev + '_', suffix='.tex')
-            log.info('created temp file ' + tmpfile.name)
+            log.info('created temp file %s', tmpfile.name)
             setattr(Files, 'tex_' + rev + '_tmp_path', tmpfile.name)
             # NamedTemporaryFile doesn't support encoding argument on Python 2.7,
             # so close and re-open it in the desired encoding
@@ -127,10 +127,10 @@ class Files(object):
 
     @staticmethod
     def destroy_tempfiles():
-        log.info('deleting temp file ' + Files.tex_old_tmp_path)
+        log.info('deleting temp file %s', Files.tex_old_tmp_path)
         Files.tex_old_tmp_hndl.close()
         os.remove(Files.tex_old_tmp_path)
-        log.info('deleting temp file ' + Files.tex_new_tmp_path)
+        log.info('deleting temp file %s', Files.tex_new_tmp_path)
         Files.tex_new_tmp_hndl.close()
         os.remove(Files.tex_new_tmp_path)
 
@@ -171,7 +171,7 @@ def read_files(ext):
 
     for rev in ['old', 'new']:
         fname = getattr(Files, '{ext}_{rev}_path'.format(ext=ext, rev=rev))
-        log.debug('reading ' + fname)
+        log.debug('reading %s', fname)
         with io.open(fname, 'r', encoding=Config.encoding) as f:
             setattr(FileContents, '{ext}_{rev}'.format(ext=ext, rev=rev), f.read())
 
@@ -198,7 +198,7 @@ def git_extract(ext, revs):
 
     for oldnew, rev in zip(['old', 'new'], revs):
         fname = getattr(Files, '{ext}_{oldnew}_path'.format(ext=ext, oldnew=oldnew))
-        log.debug('running git show {}:{}'.format(rev, fname))
+        log.debug('running git show %s:%s', rev, fname)
         setattr(FileContents, '{ext}_{oldnew}'.format(ext=ext, oldnew=oldnew),
                 git_show(fname, rev).decode(Config.encoding).replace('\r\n', '\n'))
 
@@ -233,10 +233,10 @@ def run():
 def process_revision(oldnew):
     '''Replaces references in revision and writes to temp file'''
 
-    log.info('processing ' + oldnew + ' revision')
+    log.info('processing %s revision', oldnew)
 
     # get references
-    log.info('getting all reference keys from cite commands in ' + oldnew + ' revision')
+    log.info('getting all reference keys from cite commands in %s revision', oldnew)
     get_all_ref_keys(oldnew)
 
     # get author-year strings and regex capture groups, either from bib file or bbl file
@@ -254,11 +254,11 @@ def process_revision(oldnew):
         make_author_year_tokens_from_bib(oldnew)
 
     # replace citations with written-out references
-    log.info('formatting and replacing references in ' + oldnew + ' revision')
+    log.info('formatting and replacing references in %s revision', oldnew)
     replace_refs_in_tex(oldnew)
 
     # write contents to temp file
-    log.info('writing ' + oldnew + ' changes to temp file')
+    log.info('writing %s changes to temp file', oldnew)
     write_tex_to_temp(oldnew)
 
 
@@ -275,9 +275,9 @@ def get_all_ref_keys(oldnew):
     # for each citation command, save new references
     for args in args_all_commands:
         ref_list = re.split('\s*,\s*', args)
-        log.debug('references found: {}'.format(ref_list))
+        log.debug('references found: %s', ref_list)
         new_refs = [r for r in ref_list if r not in refkeys]
-        log.debug('new references: {}'.format(new_refs))
+        log.debug('new references: %s', new_refs)
         refkeys.extend(new_refs)
 
     setattr(References, 'refkeys_' + oldnew, refkeys)
@@ -312,7 +312,7 @@ def get_capture_groups_from_bbl(oldnew):
 
         # regex pattern to look for the correct entry
         exp = Config.bbl['regex'].replace('%REFKEY%', ref)
-        log.debug('looking for ref ' + ref + ' with regex ' + exp)
+        log.debug('looking for ref %s with regex %s', ref, exp)
         p = re.compile(exp, re.S | re.M)
 
         # search using the regex, crap out if nothing was matched
@@ -323,7 +323,7 @@ def get_capture_groups_from_bbl(oldnew):
         # add captured groups to dict
         capture_groups[ref] = match.groups()
 
-        log.debug('capture tokens from refkey {}: {}'.format(ref, match.groups()))
+        log.debug('capture tokens from refkey %s: %s', ref, match.groups())
 
     setattr(References, 'capture_groups_' + oldnew, capture_groups)
 
@@ -350,7 +350,7 @@ def make_author_year_tokens_from_bbl(oldnew):
         # append the name and the year to the list
         authyear[ref] = (name, year)
 
-        log.debug('formatted tokens (%AUTHOR%, %YEAR%) for {} as {}'.format(ref, (name, year)))
+        log.debug('formatted tokens (%AUTHOR%, %YEAR%) for %s as %s', ref, (name, year))
 
     setattr(References, 'authyear_' + oldnew, authyear)
 
@@ -373,7 +373,7 @@ def read_bibfile(oldnew):
 
     # read bibtex files
     for bibfile in bibfiles:
-        log.debug('reading bibtex file ' + bibfile)
+        log.debug('reading bibtex file %s', bibfile)
         with io.open(bibfile, 'r', encoding=Config.encoding) as f:
             getattr(FileContents, 'bib_' + oldnew).append(f.read())
 
@@ -383,7 +383,7 @@ def find_bibliography_arg(s):
 
     log.debug('searching for \\bibliography{} entry in tex file')
     bibfile = re.search(r'$[^%]*\\bibliography\s*{(.*?)}', s, flags=re.M).group(1)
-    log.debug('bibliography argument found: {}'.format(bibfile))
+    log.debug('bibliography argument found: %s', bibfile)
     return bibfile
 
 
@@ -397,13 +397,13 @@ def find_bibfiles(arg, oldnew):
 
     # check if bibtex file exists (with and without file extension)
     for fname in fnames:
-        log.debug('looking for bibtex file \'' + fname + '\' in ' + sourcepath)
+        log.debug('looking for bibtex file "%s" in %s', fname, sourcepath)
         bibpath = os.path.join(sourcepath, fname)
         if not os.path.exists(bibpath):
             raise IOError('bibtex file not found with or without .bib extension: {} ({})'
                           .format(bibpath, os.path.abspath(bibpath)))
 
-        log.debug('found bibtex file {}'.format(os.path.abspath(bibpath)))
+        log.debug('found bibtex file %s', os.path.abspath(bibpath))
         getattr(Files, 'bib_' + oldnew + '_path').append(bibpath)
 
 
@@ -434,7 +434,7 @@ def make_author_year_tokens_from_bib(oldnew):
             if ref not in bib_contents:
                 continue
 
-            log.debug('formatting ' + ref)
+            log.debug('formatting %s', ref)
 
             # regex pattern to look for a whole entry - based on tips from the interwebs
             p = re.compile(r'^\s*@\s*\w+\s*\{\s*' + ref + r'\s*,.*?^\}', re.S | re.M)
@@ -477,8 +477,8 @@ def make_author_year_tokens_from_bib(oldnew):
 
             ref_found = True
 
-            log.debug('reference {} found in bibtex file {}'.format(ref, getattr(Files, 'bib_' + oldnew + '_path')[i]))
-            log.debug('formatted tokens (%AUTHOR%, %YEAR%) for {} as {}'.format(ref, (name, year)))
+            log.debug('reference %s found in bibtex file %s', ref, getattr(Files, 'bib_' + oldnew + '_path')[i])
+            log.debug('formatted tokens (%AUTHOR%, %YEAR%) for %s as %s', ref, (name, year))
 
             # no need to look in other bib files
             break
@@ -534,7 +534,7 @@ def correct_duplicate_authors(oldnew):
                 # add a letter to the year
                 year = tup[1] + 'abcdefghijklmnopqrstuvwxyz'[i]
                 # replace the tuple in the master list with the new tuple
-                log.debug('formatting duplicate {} {} as {}'.format(refkey, authyear[refkey], (tup[0], year)))
+                log.debug('formatting duplicate %s %s as %s', refkey, authyear[refkey], (tup[0], year))
                 authyear[refkey] = (tup[0], year)
 
 
@@ -552,7 +552,7 @@ def replace_refs_in_tex(oldnew):
     # process the references for each citation command
     for full_cmd, cite_cmd, opt_args, cite_args in matches:
 
-        log.debug('replacing {}'.format(full_cmd))
+        log.debug('replacing %s', full_cmd)
 
         # split args to get a list of reference keys
         refs_this = re.split('\s*,\s*', cite_args)
@@ -574,7 +574,7 @@ def replace_refs_in_tex(oldnew):
 
     # add \nocite{} before end{document} so that reference list will be written
     nocite = r'\\nocite{' + ','.join(getattr(References, 'refkeys_' + oldnew)) + '}'
-    log.debug('adding \\nocite before \\end{document}: ' + nocite)
+    log.debug('adding \\nocite before \\end{document}: %s', nocite)
     s = re.sub(r'(^[^%\n]*?\\end\s*{document})', nocite + r'\n\1', s, flags=re.M)
 
     # add custom reference protection command to preamble
@@ -681,7 +681,7 @@ def format_refs(oldnew, replace_refs, cite_cmd, prenote, postnote):
     # finalize and return the result
     out += fmt['cite_end']
 
-    log.debug('result: ' + out)
+    log.debug('result: %s', out)
 
     return out
 
@@ -689,7 +689,7 @@ def format_refs(oldnew, replace_refs, cite_cmd, prenote, postnote):
 def write_tex_to_temp(oldnew):
     '''Writes processed file contents to temp files'''
 
-    log.debug('writing to file ' + getattr(Files, 'tex_' + oldnew + '_tmp_path'))
+    log.debug('writing to file %s', getattr(Files, 'tex_' + oldnew + '_tmp_path'))
     getattr(Files, 'tex_' + oldnew + '_tmp_hndl').write(getattr(FileContents, 'tex_' + oldnew))
 
 
@@ -699,8 +699,8 @@ def run_latexdiff(file1, file2):
     args = ['latexdiff', file1, file2]
     if Config.latexdiff_args:
         args.append(Config.latexdiff_args)
-    log.info('running ' + ' '.join(args))
-    log.info('sending result to ' + Files.out_path)
+    log.info('running %s', ' '.join(args))
+    log.info('sending result to %s', Files.out_path)
     with io.open(Files.out_path, 'w', encoding=Config.encoding) as f:
         process = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
