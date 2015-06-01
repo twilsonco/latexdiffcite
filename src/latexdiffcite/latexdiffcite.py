@@ -411,7 +411,6 @@ def make_author_year_tokens_from_bib(oldnew):
     '''Looks up reference keys in bib_contents and figures out what the written-out author name and year should be'''
 
     refkeys = getattr(References, 'refkeys_' + oldnew)
-    bib_contents_all = getattr(FileContents, 'bib_' + oldnew)
 
     # if numeric mode (%AUTHOR% and %YEAR% not used in any fields), return empty strings
     if all('%AUTHOR%' not in fmt['author'] and '%YEAR%' not in fmt['year'] for fmt in Config.cmd_format.values()):
@@ -429,7 +428,7 @@ def make_author_year_tokens_from_bib(oldnew):
         ref_found = False
 
         # check each bib file
-        for i, bib_contents in enumerate(bib_contents_all):
+        for i, bib_contents in enumerate(getattr(FileContents, 'bib_' + oldnew)):
 
             if ref not in bib_contents:
                 continue
@@ -444,10 +443,9 @@ def make_author_year_tokens_from_bib(oldnew):
 
             # find author list in entry and create author string
             author_re = re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S)
-            author_str = author_re.search(entry).group(1)
 
             # split into a list of all authors
-            authors = re.split('\s+and\s+', author_str)
+            authors = re.split('\s+and\s+', author_re.search(entry).group(1))
 
             # get a list of only the surnames
             if any(',' in a for a in authors):
