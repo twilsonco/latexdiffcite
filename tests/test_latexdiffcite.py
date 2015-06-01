@@ -375,6 +375,7 @@ def test_custom_cite_command(mocker):
 
 
 def test_command_available():
-    p = subprocess.Popen(['latexdiffcite', '--version'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(['latexdiffcite', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         shell=True if platform.system() == 'Windows' else False)
     stdout, stderr = p.communicate()
     assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
