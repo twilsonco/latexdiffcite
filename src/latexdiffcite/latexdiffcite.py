@@ -701,7 +701,7 @@ def run_latexdiff(file1, file2):
     log.info('sending result to %s', Files.out_path)
     with io.open(Files.out_path, 'w', encoding=Config.encoding) as f:
         process = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+        _, stderr = process.communicate()
         ret_code = process.wait()
         if ret_code:
             raise Exception('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + stderr)
