@@ -820,3 +820,6 @@ def main():
     initiate_from_args(args)
     args.func(args)
     log.info('all done!')
+
+if __name__ == '__main__':
+    main()
