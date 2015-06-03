@@ -88,6 +88,7 @@ class Config(object):
         with io.open(json_file, 'r', encoding=Config.encoding) as f:
             config = json.load(f)
         for k, v in config.items():
+            log.debug('setting Config.%s to %s', k, v)
             setattr(Config, k, v)
 
 
