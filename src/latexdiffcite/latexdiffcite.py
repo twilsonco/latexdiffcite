@@ -253,9 +253,12 @@ def process_revision(oldnew):
     else:
         # make empty capture group dict
         get_capture_groups_from_bbl(oldnew)
-        # make formatted author/year references
-        log.info('creating corresponding author/year strings based on bib entries')
-        read_bibfile(oldnew)
+        # make formatted author/year references unless %AUTHOR% and %YEAR% is not present in any formatting
+        if any('%AUTHOR%' in fmt['author'] or '%YEAR%' in fmt['year'] for fmt in Config.cmd_format.values()):
+            log.info('creating corresponding author/year strings based on bib entries')
+            read_bibfile(oldnew)
+        else:
+            log.debug('%AUTHOR% and %YEAR% tokens not used in format, skipping parsing of bib entries')
         make_author_year_tokens_from_bib(oldnew)
 
     # replace citations with written-out references
