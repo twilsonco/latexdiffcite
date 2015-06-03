@@ -2,6 +2,7 @@
 from __future__ import division, print_function, absolute_import, unicode_literals
 
 import os
+import io
 import platform
 import itertools
 import subprocess
@@ -320,6 +321,49 @@ class TestFromInputToOutput():
         out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
         assert out_old == testcases[testcase]['out_' + encs[enc]['acc']]
         assert out_new == testcases[testcase]['out_' + encs[enc]['acc']]
+
+    def setup(self):
+        reset_everything()
+
+    def teardown(self):
+        latexdiffcite.Files.destroy_tempfiles()
+
+
+#==============================================================================
+# Parametrize a test function to test all examples in the docs
+#==============================================================================
+
+
+config_examples = os.path.join('..', 'docs', 'config_examples')
+folders = [x for x in os.listdir(config_examples)
+           if os.path.isdir(os.path.join(config_examples, x))]
+paths = [os.path.join(config_examples, x) for x in folders]
+
+
+class TestExamples():
+
+    @pytest.mark.parametrize('folder', paths, ids=folders)
+    def test_example(self, mocker, folder):
+        mocker.patch('latexdiffcite.latexdiffcite.git_show', side_effect=mock_git_show)
+        mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
+        mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
+        f_tex = os.path.join(folder, 'input.tex')
+        f_cfg = os.path.join(folder, 'config.json')
+        f_out = os.path.join(folder, 'output.tex')
+        args = ['file', f_tex, f_tex, '-c', f_cfg]
+        if 'input.bbl' in os.listdir(folder):
+            args.append('--bbl')
+        parsed_args = parser.parse_args(args)
+        latexdiffcite.initiate_from_args(parsed_args)
+        parsed_args.func(parsed_args)
+        latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
+        latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
+        out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
+        out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
+        with io.open(f_out, encoding=latexdiffcite.Config.encoding) as f:
+            out_answer = f.read()
+        assert out_old == out_answer
+        assert out_new == out_answer
 
     def setup(self):
         reset_everything()

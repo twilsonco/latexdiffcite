@@ -2,29 +2,36 @@
 Contributing
 ============
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+Bug reports, feature suggestions and other contributions are greatly appreciated! While I can't promise to implement everything, I will always respond in a timely manner.
 
 Bug reports
 ===========
 
 When `reporting a bug <https://github.com/cmeeren/latexdiffcite/issues>`_ please include:
 
-    * Your operating system name and version.
-    * Any details about your local setup that might be helpful in troubleshooting.
-    * Detailed steps to reproduce the bug.
+* your operating system name and version
+* any details about your local setup that might be helpful in troubleshooting
+* detailed steps to reproduce the bug, which could include:
+
+  * log file (run with ``-v -l`` flags, check that it doesn't contain personal details)
+  * the problematic part of your ``.tex`` file, ``.bib`` file and/or ``.bbl`` file
 
 Documentation improvements
 ==========================
 
-latexdiffcite could always use more documentation, whether as part of the
-official latexdiffcite docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+Feel free to add additional configuration examples. This should include, in the style of the existing examples, a minimal working example (no more than the bare minimum to get it working and show how the configuration behaves). You must include:
+
+* the contents of the configuration file (include all relevant settings -- don't rely on `latexdiffcite`'s defaults to stay consistent across versions)
+* the contents of an example ``.tex`` file
+* the contents of an example ``.bib`` file or ``.bbl`` file
+* the output `latexdiffcite` would produce after replacing citation commands
+
+Please run your JSON through a `JSON validator and formatter <http://jsonlint.com>`_ before adding it to the docs.
 
 Feature requests and feedback
 =============================
 
-The best way to send feedback is to file an issue at https://github.com/cmeeren/latexdiffcite/issues.
+The best way to send feedback is to file an issue at `GitHub <https://github.com/cmeeren/latexdiffcite/issues>`_.
 
 If you are proposing a feature:
 
@@ -37,7 +44,7 @@ Development
 
 To set up `latexdiffcite` for local development:
 
-1. `Fork latexdiffcite on GitHub <https://github.com/cmeeren/latexdiffcite/fork>`_.
+1. `Fork `latexdiffcite` on GitHub <https://github.com/cmeeren/latexdiffcite/fork>`_.
 2. Clone your fork locally::
 
     git clone git@github.com:your_name_here/latexdiffcite.git
@@ -46,37 +53,34 @@ To set up `latexdiffcite` for local development:
 
     git checkout -b name-of-your-bugfix-or-feature
 
-   Now you can make your changes locally.
+   Now you can make your changes locally. If you add functionality, also add a test in ``tests/test_latexdiffcite.py``. The tests are run with ``py.test`` and can be written as normal functions (starting with ``test_``) containing a standard ``assert`` statement for testing output.
 
-4. When you're done making changes, run all the checks, doc builder and spell checker with `tox <http://tox.readthedocs.org/en/latest/install.html>`_ one command::
+4. When you're done making changes, run all the checks, doc builder and spell checker with `tox <http://tox.readthedocs.org/en/latest/install.html>`_:[1]_ ::
 
     tox
 
 5. Commit your changes and push your branch to GitHub::
 
     git add .
-    git commit -m "Your detailed description of your changes."
+    git commit -m "Brief description of your changes."
     git push origin name-of-your-bugfix-or-feature
 
-6. Submit a pull request through the GitHub website.
+6. Submit a pull request through the GitHub website. Pull requests should be made to the ``develop`` branch.
 
 Pull Request Guidelines
 -----------------------
 
-If you need some code review or feedback while you're developing the code just make the pull request.
+If you need some code review or feedback while you're developing the code, just make a pull request.
 
 For merging, you should:
 
-1. Include passing tests (run ``tox``) [1]_.
-2. Update documentation when there's new API, functionality etc. 
-3. Add a note to ``CHANGELOG.rst`` about the changes.
-4. Add yourself to ``AUTHORS.rst``.
+1. Write passing tests for new functionality (run ``tox``).[1]_
+2. Update/add documentation if relevant.
+3. Add yourself to ``AUTHORS.rst``.
 
-.. [1] If you don't have all the necessary python versions available locally you can rely on Travis - it will 
-       `run the tests <https://travis-ci.org/cmeeren/latexdiffcite/pull_requests>`_ for each change you add in the pull request.
-       
-       It will be slower though ...
-       
+.. [1] If you don't have all the necessary python versions available locally you can rely on Travis -- it will
+       `run the tests <https://travis-ci.org/cmeeren/latexdiffcite/pull_requests>`_ for each change you add in the pull request. It will be a bit slower than testing locally, though.
+
 Tips
 ----
 
@@ -84,6 +88,6 @@ To run a subset of tests::
 
     tox -e envname -- py.test -k test_myfeature
 
-To run all the test environments in *parallel* (you need to ``pip install detox``)::
+To run all the test environments in parallel (you need to ``pip install detox``)::
 
     detox

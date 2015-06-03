@@ -1,5 +1,0 @@
-latexdiffcite
-=============================
-
-.. automodule:: latexdiffcite
-    :members:

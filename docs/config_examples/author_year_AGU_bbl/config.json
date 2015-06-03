@@ -1,0 +1,43 @@
+{
+    "ref_single_word": false,
+    "bbl": {
+        "regex": "\\\\bibitem\\[{((?:(?!^$).)*?)\\(((?:(?!^$).)*?)(?:{\\\\natexlab{(.?)}})?\\)((?:(?!^$).)*?)}\\]{%REFKEY%}",
+        "author": "%CG1%",
+        "year": "%CG2%%CG3%"
+    },
+    "cmd_format": {
+        "citep": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%AUTHOR%",
+            "sep_author_year": ", ",
+            "year": "%YEAR%",
+            "sep_same_author_year": ", ",
+            "sep_ref": "; ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        },
+        "citet": {
+            "cite_start": "",
+            "sep_prenote": " ",
+            "author": "%AUTHOR%",
+            "sep_author_year": " ",
+            "year": "[%YEAR%]",
+            "sep_same_author_year": ", ",
+            "sep_ref": "; ",
+            "sep_postnote": ", ",
+            "cite_end": ""
+        },
+        "cite": {
+            "cite_start": "",
+            "sep_prenote": " ",
+            "author": "%AUTHOR%",
+            "sep_author_year": " ",
+            "year": "[%YEAR%]",
+            "sep_same_author_year": ", ",
+            "sep_ref": "; ",
+            "sep_postnote": ", ",
+            "cite_end": ""
+        }
+    }
+}

@@ -1,0 +1,10 @@
+\documentclass{article}
+\begin{document}
+Same-author references are cool [\textit{Foo}, 2010; \textit{Foo and Bar}, 2011a, b, 2012; \textit{Foo et~al.}, 2011; \textit{Bar and Baz}, 2013].
+citet is pretty awesome too, according to \textit{Foo} [2010] (and later confirmed by \textit{Bar and Baz} [2013]).
+Prenote only [e.g. \textit{Foo and Bar}, 2011a].
+Pre- and postnote [e.g. \textit{Foo and Bar}, 2011b; \textit{Foo et~al.}, 2011, and references therein].
+Postnote only [\textit{Foo}, 2010, and references therein].
+\bibliography{input}
+\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
+\end{document}
