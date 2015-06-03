@@ -44,7 +44,7 @@ What is `latexdiffcite`?
 
 `latexdiffcite` is a wrapper around `latexdiff` to make citations diff properly:
 
-.. image:: illustration.png
+.. image:: docs/illustration.png
 
 `latexdiffcite` is a wrapper around `latexdiff` which, before calling `latexdiff`, replaces (in temporary files!) citation commands such as ``\cite{...}`` with written-out formatted references. It does this by looking up references in a corresponding ``.bib`` file or ``.bbl`` file and formatting them according to a user-specifiable configuration. `latexdiff` will then properly mark changes in the citations. The citation format can be heavily customized to match what you are already getting from LaTeX/BibTeX.
 
