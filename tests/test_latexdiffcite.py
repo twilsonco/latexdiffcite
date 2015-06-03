@@ -40,13 +40,7 @@ def reset_everything():
     latexdiffcite.FileContents.bbl_old = ''
     latexdiffcite.FileContents.bbl_new = ''
 
-    latexdiffcite.Config.encoding = None
-    latexdiffcite.Config.latexdiff_args = None
-    latexdiffcite.Config.git_force_unix_pathsep = None
-    latexdiffcite.Config.ref_single_word = None
-    latexdiffcite.Config.bib = None
-    latexdiffcite.Config.bbl = None
-    latexdiffcite.Config.cmd_format = None
+    latexdiffcite.Config.load_defaults()
 
 
 def mock_git_show(fname, rev):

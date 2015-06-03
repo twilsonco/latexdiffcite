@@ -27,54 +27,58 @@ log = logging.getLogger(__name__)
 
 
 class Config(object):
-    encoding = 'utf-8'
-    latexdiff_args = ''
-    git_force_unix_pathsep = True
-    ref_single_word = True
-    bib = {
-        'max_authors': 2,
-        'sep_authors_first': ', ',
-        'author_serialcomma': True,
-        'sep_authors_last': ' and ',
-        'et_al': ' et~al.'
-    }
-    bbl = {
-        'regex': r'\\bibitem\[{((?:(?!^$).)*?)\(((?:(?!^$).)*?)(?:{\\natexlab{(.?)}})?\)((?:(?!^$).)*?)}\]{%REFKEY%}',
-        'author': '%CG1%',
-        'year': '%CG2%%CG3%'
-    }
-    cmd_format = {
-        'citep':
-            {'cite_start': '[',
-             'sep_prenote': ' ',
-             'author': '\\textit{%AUTHOR%}',
-             'sep_author_year': ', ',
-             'year': '%YEAR%',
-             'sep_same_author_year': ', ',
-             'sep_ref': '; ',
-             'sep_postnote': ', ',
-             'cite_end': ']'},
-        'citet':
-            {'cite_start': '',
-             'sep_prenote': ' ',
-             'author': '\\textit{%AUTHOR%}',
-             'sep_author_year': ' ',
-             'year': '[%YEAR%]',
-             'sep_same_author_year': ', ',
-             'sep_ref': '; ',
-             'sep_postnote': ', ',
-             'cite_end': ''},
-        'cite':
-            {'cite_start': '',
-             'sep_prenote': ' ',
-             'author': '\\textit{%AUTHOR%}',
-             'sep_author_year': ' ',
-             'year': '[%YEAR%]',
-             'sep_same_author_year': ', ',
-             'sep_ref': '; ',
-             'sep_postnote': ', ',
-             'cite_end': ''}
-    }
+
+    @staticmethod
+    def load_defaults():
+        log.debug('loading default settings')
+        Config.encoding = 'utf-8'
+        Config.latexdiff_args = ''
+        Config.git_force_unix_pathsep = True
+        Config.ref_single_word = True
+        Config.bib = {
+            'max_authors': 2,
+            'sep_authors_first': ', ',
+            'author_serialcomma': True,
+            'sep_authors_last': ' and ',
+            'et_al': ' et~al.'
+        }
+        Config.bbl = {
+            'regex': r'\\bibitem\[{((?:(?!^$).)*?)\(((?:(?!^$).)*?)(?:{\\natexlab{(.?)}})?\)((?:(?!^$).)*?)}\]{%REFKEY%}',
+            'author': '%CG1%',
+            'year': '%CG2%%CG3%'
+        }
+        Config.cmd_format = {
+            'citep':
+                {'cite_start': '[',
+                 'sep_prenote': ' ',
+                 'author': '\\textit{%AUTHOR%}',
+                 'sep_author_year': ', ',
+                 'year': '%YEAR%',
+                 'sep_same_author_year': ', ',
+                 'sep_ref': '; ',
+                 'sep_postnote': ', ',
+                 'cite_end': ']'},
+            'citet':
+                {'cite_start': '',
+                 'sep_prenote': ' ',
+                 'author': '\\textit{%AUTHOR%}',
+                 'sep_author_year': ' ',
+                 'year': '[%YEAR%]',
+                 'sep_same_author_year': ', ',
+                 'sep_ref': '; ',
+                 'sep_postnote': ', ',
+                 'cite_end': ''},
+            'cite':
+                {'cite_start': '',
+                 'sep_prenote': ' ',
+                 'author': '\\textit{%AUTHOR%}',
+                 'sep_author_year': ' ',
+                 'year': '[%YEAR%]',
+                 'sep_same_author_year': ', ',
+                 'sep_ref': '; ',
+                 'sep_postnote': ', ',
+                 'cite_end': ''}
+        }
 
     @staticmethod
     def load_config(json_file):
@@ -803,6 +807,7 @@ def initiate_from_args(args):
     Files.out_path = args.file_out
 
     # load config
+    Config.load_defaults()
     if hasattr(args, 'file_config'):
         Config.load_config(args.file_config)
 
