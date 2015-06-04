@@ -162,19 +162,136 @@ class FileContents(object):
 # ==============================================================================
 
 
-def run_main_file(args):
-    '''Reads files from disk and runs main script'''
+def main():
+    '''Entry point for the script'''
 
-    # read revisions from disk
-    log.debug('reading old and new revisions')
-    read_files('tex')
-    if Files.bbl_old_path and Files.bbl_new_path:
-        read_files('bbl')
+    parser = create_parser()
+    args = parser.parse_args()
+    initiate_from_args(args)
+    run(args)
+    log.info('all done!')
 
-    # run main script
+
+def create_parser():
+    '''Creates parser'''
+    parser = argparse.ArgumentParser(prog='latexdiffcite',
+                                     description='Replaces \\cite{} commands in two files with properly formatted '
+                                                 'references and calls latexdiff on the result')
+
+    parser.add_argument('-V', '--version', action='version', version='latexdiffcite version {}'.format(__version__))
+
+    # add subparsers: file, git, test
+    subparsers = parser.add_subparsers(title='Subcommands', dest='command',
+                                       description='for help, run %(prog)s SUBCOMMAND -h')
+    parser_file = subparsers.add_parser('file', help='compare two files')
+    parser_git = subparsers.add_parser('git', help='compare revisions of a file in a git repository')
+
+    # add argument common to all subcommands
+    for p in [parser_file, parser_git]:
+        p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='show debug log on screen')
+        p.add_argument('-l', '--log', dest='log', metavar='LOGFILE', nargs='?', default=False,
+                       const='latexdiffcite.log', help='enable logging to LOGFILE, default %(const)s')
+        p.add_argument('-s', '--silent', dest='silent', action='store_true', default=False, help='only show warnings on screen')
+        p.add_argument('-o', '--output', dest='file_out', metavar='FILE_OUT',
+                       default='diff.tex', help='output file, default %(default)s')
+        p.add_argument('-c', '--config', dest='file_config', metavar='CONFIG_FILE',
+                       help='config file, see documentation for options')
+        p.add_argument('-b', '--bbl', dest='bbl_path', metavar='BBL_SUBDIR', default=None, nargs='?', const='',
+                       help='path to where the bbl file resides (default: same directory as file). The filename is '
+                            'assumed to be the same as the tex file. The bbl file will be used for formatting '
+                            'references instead of getting  author names and year from a bib file. '
+                            'Useful e.g. if you are not using author-year style. You will also need to specify a '
+                            'configuration file with a regex to extract this info from the bib file, see the '
+                            'documentation for details')
+        p.add_argument('--bbl2', dest='bbl2_path', metavar='BBL_NEW_SUBDIR', default=None, nargs='?', const='',
+                       help='Path to where the new bbl file resides if different from old bbl file.')
+
+    # add positional arguments to file subcommand
+    parser_file.add_argument('file_old', metavar='FILE_OLD', help='old revision')
+    parser_file.add_argument('file_new', metavar='FILE_NEW', help='new revision')
+
+    # add positional arguments to git subcommand
+    parser_git.add_argument('file_old', metavar='FILE', help='file to process (from base of git repository)')
+    parser_git.add_argument('rev_old', metavar='REV_OLD', help='commit/tag/branch to use as base')
+    parser_git.add_argument('rev_new', metavar='REV_NEW', nargs='?', default='HEAD',
+                            help='commit/tag/branch to use as base, default %(default)s')
+    parser_git.add_argument('file_new', metavar='FILE_NEW', nargs='?', default=None,
+                            help='use if new revision has another filename')
+
+    return parser
+
+
+def initiate_from_args(args):
+    '''Sets up logging and file paths, and loads config'''
+
+    # set up logging
+    log.setLevel(logging.DEBUG)
+    log.addHandler(logging.NullHandler())
+    formatter_full = logging.Formatter('[%(filename)s:%(lineno)4s %(funcName)28s() ] %(levelname)8s  %(message)s')
+    formatter_info = logging.Formatter('%(message)s')
+    # set up logging to file
+    if args.log:
+        hdlr_file = logging.FileHandler(args.log, mode='w')
+        hdlr_file.setFormatter(formatter_full)
+        hdlr_file.setLevel(logging.DEBUG)
+        log.addHandler(hdlr_file)
+    # set up logging to terminal
+    hdlr_stream = logging.StreamHandler()
+    if args.verbose:
+        hdlr_stream.setLevel(logging.DEBUG)
+        hdlr_stream.setFormatter(formatter_full)
+    elif not hasattr(args, 'silent') or args.silent:
+        hdlr_stream.setLevel(logging.WARNING)
+        hdlr_stream.setFormatter(formatter_info)
+    else:
+        hdlr_stream.setLevel(logging.INFO)
+        hdlr_stream.setFormatter(formatter_info)
+    log.addHandler(hdlr_stream)
+
+    # paths of tex files
+    Files.tex_old_path = args.file_old
+    Files.tex_new_path = args.file_new or args.file_old
+
+    # path to bbl files
+    if args.bbl2_path is None:
+        args.bbl2_path = args.bbl_path
+    if args.bbl_path is not None:
+        args.bbl_path = os.path.join(os.path.dirname(Files.tex_old_path), args.bbl_path)
+        args.bbl2_path = os.path.join(os.path.dirname(Files.tex_new_path), args.bbl2_path)
+        bbl_filename = os.path.splitext(os.path.basename(Files.tex_old_path))[0] + '.bbl'
+        Files.bbl_old_path = os.path.join(args.bbl_path, bbl_filename)
+        Files.bbl_new_path = os.path.join(args.bbl2_path, bbl_filename)
+
+    # path to output file
+    Files.out_path = args.file_out
+
+    # load config
+    Config.load_defaults()
+    if hasattr(args, 'file_config'):
+        Config.load_config(args.file_config)
+
+
+def run(args):
+    '''Replaces references in both revisions and runs latexdiff'''
+
+    if args.command == 'file':
+        # read revisions from disk
+        read_files('tex')
+        if Files.bbl_old_path and Files.bbl_new_path:
+            read_files('bbl')
+    else:
+        # read revisions from git
+        log.debug('getting revisions from git')
+        git_extract('tex', [args.rev_old, args.rev_new])
+        if Files.bbl_old_path and Files.bbl_new_path:
+            git_extract('bbl', [args.rev_old, args.rev_new])
+
+    # process the files
     try:
         Files.create_tempfiles()
-        run()
+        process_revision('old')
+        process_revision('new')
+        run_latexdiff(Files.tex_old_tmp_path, Files.tex_new_tmp_path)
     finally:
         Files.destroy_tempfiles()
 
@@ -187,23 +304,6 @@ def read_files(ext):
         log.debug('reading %s', fname)
         with io.open(fname, 'r', encoding=Config.encoding) as f:
             setattr(FileContents, '{ext}_{rev}'.format(ext=ext, rev=rev), f.read())
-
-
-def run_main_git(args):
-    '''Reads files from git repository and runs main script'''
-
-    # read revisions from git
-    log.debug('getting revisions from git')
-    git_extract('tex', [args.rev_old, args.rev_new])
-    if Files.bbl_old_path and Files.bbl_new_path:
-        git_extract('bbl', [args.rev_old, args.rev_new])
-
-    # run main script
-    try:
-        Files.create_tempfiles()
-        run()
-    finally:
-        Files.destroy_tempfiles()
 
 
 def git_extract(ext, revs):
@@ -231,14 +331,6 @@ def git_show(fname, rev):
     if ret_code:
         raise Exception('git returned with code {}. Error from git:\n\n'.format(ret_code) + stderr)
     return stdout
-
-
-def run():
-    '''Replaces references in both revisions and runs latexdiff'''
-
-    process_revision('old')
-    process_revision('new')
-    run_latexdiff(Files.tex_old_tmp_path, Files.tex_new_tmp_path)
 
 
 def process_revision(oldnew):
@@ -721,117 +813,6 @@ def run_latexdiff(file1, file2):
         if ret_code:
             raise Exception('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + stderr)
 
-
-def create_parser():
-    '''Creates parser'''
-    parser = argparse.ArgumentParser(prog='latexdiffcite',
-                                     description='Replaces \\cite{} commands in two files with properly formatted '
-                                                 'references and calls latexdiff on the result')
-
-    parser.add_argument('-V', '--version', action='version', version='latexdiffcite version {}'.format(__version__))
-
-    # add subparsers: file, git, test
-    subparsers = parser.add_subparsers(title='Subcommands', description='for help, run %(prog)s SUBCOMMAND -h')
-    parser_file = subparsers.add_parser('file', help='compare two files')
-    parser_git = subparsers.add_parser('git', help='compare revisions of a file in a git repository')
-
-    # set subparser functions
-    parser_file.set_defaults(func=run_main_file)
-    parser_git.set_defaults(func=run_main_git)
-
-    # add argument common to all subcommands
-    for p in [parser_file, parser_git]:
-        p.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='show debug log on screen')
-        p.add_argument('-l', '--log', dest='log', metavar='LOGFILE', nargs='?', default=False,
-                       const='latexdiffcite.log', help='enable logging to LOGFILE, default %(const)s')
-        p.add_argument('-s', '--silent', dest='silent', action='store_true', default=False, help='only show warnings on screen')
-        p.add_argument('-o', '--output', dest='file_out', metavar='FILE_OUT',
-                       default='diff.tex', help='output file, default %(default)s')
-        p.add_argument('-c', '--config', dest='file_config', metavar='CONFIG_FILE',
-                       help='config file, see documentation for options')
-        p.add_argument('-b', '--bbl', dest='bbl_path', metavar='BBL_SUBDIR', default=None, nargs='?', const='',
-                       help='path to where the bbl file resides (default: same directory as file). The filename is '
-                            'assumed to be the same as the tex file. The bbl file will be used for formatting '
-                            'references instead of getting  author names and year from a bib file. '
-                            'Useful e.g. if you are not using author-year style. You will also need to specify a '
-                            'configuration file with a regex to extract this info from the bib file, see the '
-                            'documentation for details')
-        p.add_argument('--bbl2', dest='bbl2_path', metavar='BBL_NEW_SUBDIR', default=None, nargs='?', const='',
-                       help='Path to where the new bbl file resides if different from old bbl file.')
-
-    # add positional arguments to file subcommand
-    parser_file.add_argument('file_old', metavar='FILE_OLD', help='old revision')
-    parser_file.add_argument('file_new', metavar='FILE_NEW', help='new revision')
-
-    # add positional arguments to git subcommand
-    parser_git.add_argument('file_old', metavar='FILE', help='file to process (from base of git repository)')
-    parser_git.add_argument('rev_old', metavar='REV_OLD', help='commit/tag/branch to use as base')
-    parser_git.add_argument('rev_new', metavar='REV_NEW', nargs='?', default='HEAD',
-                            help='commit/tag/branch to use as base, default %(default)s')
-    parser_git.add_argument('file_new', metavar='FILE_NEW', nargs='?', default=None,
-                            help='use if new revision has another filename')
-
-    return parser
-
-
-def initiate_from_args(args):
-    '''Sets up logging and file paths, and loads config'''
-
-    # set up logging
-    log.setLevel(logging.DEBUG)
-    log.addHandler(logging.NullHandler())
-    formatter_full = logging.Formatter('[%(filename)s:%(lineno)4s %(funcName)28s() ] %(levelname)8s  %(message)s')
-    formatter_info = logging.Formatter('%(message)s')
-    # set up logging to file
-    if args.log:
-        hdlr_file = logging.FileHandler(args.log, mode='w')
-        hdlr_file.setFormatter(formatter_full)
-        hdlr_file.setLevel(logging.DEBUG)
-        log.addHandler(hdlr_file)
-    # set up logging to terminal
-    hdlr_stream = logging.StreamHandler()
-    if args.verbose:
-        hdlr_stream.setLevel(logging.DEBUG)
-        hdlr_stream.setFormatter(formatter_full)
-    elif not hasattr(args, 'silent') or args.silent:
-        hdlr_stream.setLevel(logging.WARNING)
-        hdlr_stream.setFormatter(formatter_info)
-    else:
-        hdlr_stream.setLevel(logging.INFO)
-        hdlr_stream.setFormatter(formatter_info)
-    log.addHandler(hdlr_stream)
-
-    # paths of tex files
-    Files.tex_old_path = args.file_old
-    Files.tex_new_path = args.file_new or args.file_old
-
-    # path to bbl files
-    if args.bbl2_path is None:
-        args.bbl2_path = args.bbl_path
-    if args.bbl_path is not None:
-        args.bbl_path = os.path.join(os.path.dirname(Files.tex_old_path), args.bbl_path)
-        args.bbl2_path = os.path.join(os.path.dirname(Files.tex_new_path), args.bbl2_path)
-        bbl_filename = os.path.splitext(os.path.basename(Files.tex_old_path))[0] + '.bbl'
-        Files.bbl_old_path = os.path.join(args.bbl_path, bbl_filename)
-        Files.bbl_new_path = os.path.join(args.bbl2_path, bbl_filename)
-
-    # path to output file
-    Files.out_path = args.file_out
-
-    # load config
-    Config.load_defaults()
-    if hasattr(args, 'file_config'):
-        Config.load_config(args.file_config)
-
-
-def main():
-    '''Entry point for the script'''
-
-    parser = create_parser()
-    args = parser.parse_args()
-    initiate_from_args(args)
-    args.func(args)
-    log.info('all done!')
 
 if __name__ == '__main__':
     main()

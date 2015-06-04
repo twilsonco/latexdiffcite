@@ -65,9 +65,9 @@ def mock_git_show(fname, rev):
 parser = latexdiffcite.create_parser()
 
 
-#==============================================================================
-### Outputs
-#==============================================================================
+# ==============================================================================
+#  Outputs
+# ==============================================================================
 
 out_author_year_agu_bib_non_accented = r'''
 \begin{document}
@@ -258,9 +258,9 @@ Accented characters: æÆøØåÅ äÄöÖüÜß
 \end{document}
 '''
 
-#==============================================================================
-### Parametrize a test function
-#==============================================================================
+# ==============================================================================
+#  Parametrize a test function to test combinations of encodings, styles, etc.
+# ==============================================================================
 
 # different test cases (citation formatting)
 testcases = {
@@ -319,7 +319,7 @@ class TestFromInputToOutput():
         parsed_args = parser.parse_args(args)
         latexdiffcite.initiate_from_args(parsed_args)
         latexdiffcite.Config.encoding = encs[enc]['enc']
-        parsed_args.func(parsed_args)
+        latexdiffcite.run(parsed_args)
         latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
         latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
         out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
@@ -334,9 +334,9 @@ class TestFromInputToOutput():
         latexdiffcite.Files.destroy_tempfiles()
 
 
-#==============================================================================
-# Parametrize a test function to test all examples in the docs
-#==============================================================================
+# ==============================================================================
+#  Parametrize a test function to test all examples in the docs
+# ==============================================================================
 
 
 config_examples = os.path.join('..', 'docs', 'config_examples')
@@ -360,7 +360,7 @@ class TestExamples():
             args.append('--bbl')
         parsed_args = parser.parse_args(args)
         latexdiffcite.initiate_from_args(parsed_args)
-        parsed_args.func(parsed_args)
+        latexdiffcite.run(parsed_args)
         latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
         latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
         out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
@@ -422,3 +422,11 @@ def test_command_available():
                          shell=True if platform.system() == 'Windows' else False)
     stdout, stderr = p.communicate()
     assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
+
+
+def test_main(tmpdir):
+    '''Tests that main(), destroy_tempfiles() and run_latexdiff() runs without error'''
+    fname = os.path.join('non_accented_ANSI_LF', 'test.tex')
+    subprocess.Popen(['latexdiffcite', 'file', fname, fname, '-o', str(tmpdir.join('diff.tex'))],
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                     shell=True if platform.system() == 'Windows' else False)
