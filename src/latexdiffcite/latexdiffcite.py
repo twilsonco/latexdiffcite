@@ -122,7 +122,7 @@ class Files(object):
     def create_tempfiles():
         for rev in ['new', 'old']:
             tmpfile = tempfile.NamedTemporaryFile(delete=False, prefix='tmp_' + rev + '_', suffix='.tex')
-            log.info('created temp file %s', tmpfile.name)
+            log.debug('created temp file %s', tmpfile.name)
             setattr(Files, 'tex_' + rev + '_tmp_path', tmpfile.name)
             # NamedTemporaryFile doesn't support encoding argument on Python 2.7,
             # so close and re-open it in the desired encoding
@@ -132,10 +132,10 @@ class Files(object):
 
     @staticmethod
     def destroy_tempfiles():
-        log.info('deleting temp file %s', Files.tex_old_tmp_path)
+        log.debug('deleting temp file %s', Files.tex_old_tmp_path)
         Files.tex_old_tmp_hndl.close()
         os.remove(Files.tex_old_tmp_path)
-        log.info('deleting temp file %s', Files.tex_new_tmp_path)
+        log.debug('deleting temp file %s', Files.tex_new_tmp_path)
         Files.tex_new_tmp_hndl.close()
         os.remove(Files.tex_new_tmp_path)
 
@@ -158,7 +158,7 @@ def run_main_file(args):
     '''Reads files from disk and runs main script'''
 
     # read revisions from disk
-    log.info('reading old and new revisions')
+    log.debug('reading old and new revisions')
     read_files('tex')
     if Files.bbl_old_path and Files.bbl_new_path:
         read_files('bbl')
@@ -185,7 +185,7 @@ def run_main_git(args):
     '''Reads files from git repository and runs main script'''
 
     # read revisions from git
-    log.info('getting revisions from git')
+    log.debug('getting revisions from git')
     git_extract('tex', [args.rev_old, args.rev_new])
     if Files.bbl_old_path and Files.bbl_new_path:
         git_extract('bbl', [args.rev_old, args.rev_new])
@@ -241,13 +241,13 @@ def process_revision(oldnew):
     log.info('processing %s revision', oldnew)
 
     # get references
-    log.info('getting all reference keys from cite commands in %s revision', oldnew)
+    log.debug('getting all reference keys from cite commands in %s revision', oldnew)
     get_all_ref_keys(oldnew)
 
     # get author-year strings and regex capture groups, either from bib file or bbl file
     if getattr(FileContents, 'bbl_' + oldnew):
         # get regex capture groups and make author-year strings from bbl files
-        log.info('retrieving corresponding regex matches from bbl')
+        log.debug('retrieving regex matches from bbl')
         get_capture_groups_from_bbl(oldnew)
         make_author_year_tokens_from_bbl(oldnew)
     else:
@@ -255,18 +255,18 @@ def process_revision(oldnew):
         get_capture_groups_from_bbl(oldnew)
         # make formatted author/year references unless %AUTHOR% and %YEAR% is not present in any formatting
         if any('%AUTHOR%' in fmt['author'] or '%YEAR%' in fmt['year'] for fmt in Config.cmd_format.values()):
-            log.info('creating corresponding author/year strings based on bib entries')
+            log.debug('creating author/year strings based on bib entries')
             read_bibfile(oldnew)
         else:
             log.debug('%AUTHOR% and %YEAR% tokens not used in format, skipping parsing of bib entries')
         make_author_year_tokens_from_bib(oldnew)
 
     # replace citations with written-out references
-    log.info('formatting and replacing references in %s revision', oldnew)
+    log.debug('formatting and replacing references in %s revision', oldnew)
     replace_refs_in_tex(oldnew)
 
     # write contents to temp file
-    log.info('writing %s changes to temp file', oldnew)
+    log.debug('writing %s changes to temp file', oldnew)
     write_tex_to_temp(oldnew)
 
 
@@ -706,7 +706,7 @@ def run_latexdiff(file1, file2):
     if Config.latexdiff_args:
         args.append(Config.latexdiff_args)
     log.info('running %s', ' '.join(args))
-    log.info('sending result to %s', Files.out_path)
+    log.debug('sending result to %s', Files.out_path)
     with io.open(Files.out_path, 'w', encoding=Config.encoding) as f:
         process = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
         _, stderr = process.communicate()
