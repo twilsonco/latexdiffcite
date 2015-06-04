@@ -422,6 +422,14 @@ def test_command_available():
     assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
 
 
+def test_run_module():
+    p = subprocess.Popen(['python', '-m', 'latexdiffcite', '--version'],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         shell=True if platform.system() == 'Windows' else False)
+    stdout, stderr = p.communicate()
+    assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
+
+
 def test_main(tmpdir):
     '''Tests that main(), destroy_tempfiles() and run_latexdiff() runs without error'''
     fname = os.path.join('non_accented_ANSI_LF', 'test.tex')
