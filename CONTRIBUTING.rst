@@ -74,7 +74,7 @@ If you need some code review or feedback while you're developing the code, just 
 
 For merging, you should:
 
-1. Write passing tests for new functionality (run ``tox``).[1]_
+1. Write passing tests for new functionality (run ``tox``). [1]_
 2. Update/add documentation if relevant.
 3. Add yourself to ``AUTHORS.rst``.
 
