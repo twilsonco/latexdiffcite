@@ -31,6 +31,7 @@ class Config(object):
 
     @staticmethod
     def load_defaults():
+        '''Loads default config settings'''
         log.debug('loading default settings')
         Config.encoding = 'utf-8'
         Config.latexdiff_args = ''
@@ -94,6 +95,8 @@ class Config(object):
 
 
 class References(object):
+    '''Container for reference list and corresponding regex capture groups and author/year strings'''
+
     refkeys_old = []
     refkeys_new = []
     capture_groups_old = {}
@@ -103,7 +106,7 @@ class References(object):
 
 
 class Files(object):
-    '''Container for file-related info'''
+    '''Container for file paths and handles'''
 
     out_path = None
     tex_old_path = None
@@ -121,6 +124,7 @@ class Files(object):
 
     @staticmethod
     def create_tempfiles():
+        '''Create temporary .tex files'''
         for rev in ['new', 'old']:
             tmpfile = tempfile.NamedTemporaryFile(delete=False, prefix='tmp_' + rev + '_', suffix='.tex')
             log.debug('created temp file %s', tmpfile.name)
@@ -133,6 +137,7 @@ class Files(object):
 
     @staticmethod
     def destroy_tempfiles():
+        '''Delete temporary .tex files'''
         log.debug('deleting temp file %s', Files.tex_old_tmp_path)
         Files.tex_old_tmp_hndl.close()
         os.remove(Files.tex_old_tmp_path)
@@ -142,6 +147,8 @@ class Files(object):
 
 
 class FileContents(object):
+    '''Container for file contents (multiple bib files supported, so use list of strings instead of single string)'''
+
     tex_old = ''
     tex_new = ''
     bib_old = []
@@ -294,6 +301,7 @@ def get_all_ref_keys(oldnew):
 
 def remove_comments(s):
     '''Removes commented-out parts (after %) of lines in a multiline string'''
+
     s = re.sub(r'%.*', '', s)
     return s
 
@@ -769,6 +777,7 @@ def create_parser():
 
 
 def initiate_from_args(args):
+    '''Sets up logging and file paths, and loads config'''
 
     # set up logging
     log.setLevel(logging.DEBUG)
@@ -818,6 +827,7 @@ def initiate_from_args(args):
 
 
 def main():
+    '''Entry point for the script'''
 
     parser = create_parser()
     args = parser.parse_args()
