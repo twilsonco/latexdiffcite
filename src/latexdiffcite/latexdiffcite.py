@@ -4,8 +4,11 @@
 '''latexdiffcite.latexdiffcite: the actual script, and the entry point main().'''
 
 
-from __future__ import division, print_function, absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
+import io
 import os
 import re
 import json
@@ -13,8 +16,6 @@ import logging
 import argparse
 import tempfile
 import subprocess
-
-import io
 
 __version__ = '0.9.0'
 
