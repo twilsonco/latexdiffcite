@@ -4,6 +4,12 @@ Contributing
 
 Bug reports, feature suggestions and other contributions are greatly appreciated! While I can't promise to implement everything, I will always respond in a timely manner.
 
+Short version
+=============
+
+* Submit bug reports and feature requests at `GitHub <https://github.com/cmeeren/latexdiffcite/issues>`_
+* Make pull requests to the ``develop`` branch
+
 Bug reports
 ===========
 
