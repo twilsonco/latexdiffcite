@@ -1,19 +1,15 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import, print_function
+from __future__ import print_function, absolute_import
 
 import io
 import os
 import re
 from glob import glob
-from os.path import basename
-from os.path import dirname
-from os.path import join
-from os.path import relpath
-from os.path import splitext
+from os.path import join, dirname, relpath, basename, splitext
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import setup, find_packages
+
 
 def read(*names, **kwargs):
     return io.open(
