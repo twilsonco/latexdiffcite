@@ -358,7 +358,7 @@ def make_author_year_tokens_from_bbl(oldnew):
         # append the name and the year to the list
         authyear[ref] = (name, year)
 
-        log.debug('formatted tokens (%AUTHOR%, %YEAR%) for %s as %s', ref, (name, year))
+        log.debug('formatted tokens (%%AUTHOR%%, %%YEAR%%) for %s as %s', ref, (name, year))
 
     setattr(References, 'authyear_' + oldnew, authyear)
 
@@ -484,7 +484,7 @@ def make_author_year_tokens_from_bib(oldnew):
             ref_found = True
 
             log.debug('reference %s found in bibtex file %s', ref, getattr(Files, 'bib_' + oldnew + '_path')[i])
-            log.debug('formatted tokens (%AUTHOR%, %YEAR%) for %s as %s', ref, (name, year))
+            log.debug('formatted tokens (%%AUTHOR%%, %%YEAR%%) for %s as %s', ref, (name, year))
 
             # no need to look in other bib files
             break
