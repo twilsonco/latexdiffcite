@@ -241,8 +241,6 @@ def run():
     run_latexdiff(Files.tex_old_tmp_path, Files.tex_new_tmp_path)
 
 
-# formatting of INFO logs
-
 def process_revision(oldnew):
     '''Replaces references in revision and writes to temp file'''
 
