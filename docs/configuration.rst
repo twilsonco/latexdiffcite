@@ -7,7 +7,15 @@ Configuration file
 Default configuration
 ---------------------
 
-The configuration file you can point to with ``-c CONFIG_FILE`` is a JSON file which looks like this:
+`latexdiffcite` will load settings from three places, each one overriding previous ones:
+
+1. Internal hard-coded defaults (provided below)
+2. ``~/.latexdiffcite.json`` (in your user folder) if it exists
+3. Settings from a file specified using ``-c CONFIG_FILE``
+
+This way, you can put your preferred settings in ``~/.latexdiffcite.json`` which will be loaded every time, and override them using ``-c CONFIG_FILE`` if necessary.
+
+The configuration file is a JSON file which looks like this:
 
 .. code-block:: json
 

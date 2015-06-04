@@ -5,6 +5,7 @@ from __future__ import division, print_function, absolute_import, unicode_litera
 
 import io
 import os
+import shutil
 import platform
 import itertools
 import subprocess
@@ -427,3 +428,35 @@ def test_main(tmpdir):
     subprocess.Popen(['latexdiffcite', 'file', fname, fname, '-o', str(tmpdir.join('diff.tex'))],
                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                      shell=True if platform.system() == 'Windows' else False)
+
+
+@pytest.fixture
+def reset(request):
+    reset_everything()
+
+    def destroy_tempfiles():
+        latexdiffcite.Files.destroy_tempfiles()
+
+    request.addfinalizer(destroy_tempfiles)
+
+
+def test_home_conf(tmpdir, mocker, reset):
+    '''Tests loading of configuration file in user's home directory'''
+    def mock_expanduser(path):
+        '''Make expanduser expand to temporary directory instead of home directory'''
+        return path.replace('~', str(tmpdir))
+    mocker.patch('latexdiffcite.latexdiffcite.os.path.expanduser', side_effect=mock_expanduser)
+    mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
+    mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
+    shutil.copy(os.path.join('configs', 'config_numeric.json'), os.path.join(str(tmpdir), '.latexdiffcite.json'))
+    fname = os.path.join('non_accented_ANSI_LF', 'test.tex')
+    args = ['file', fname, fname]
+    parsed_args = parser.parse_args(args)
+    latexdiffcite.initiate_from_args(parsed_args)
+    latexdiffcite.run(parsed_args)
+    latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
+    latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
+    out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
+    out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
+    assert out_old == out_numeric_non_accented
+    assert out_new == out_numeric_non_accented

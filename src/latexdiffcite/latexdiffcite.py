@@ -265,7 +265,12 @@ def initiate_from_args(args):
 
     # load config
     Config.load_defaults()
+    default_cfile = os.path.expanduser(os.path.join('~', '.latexdiffcite.json'))
+    if os.path.isfile(default_cfile):
+        log.debug('Loading config from %s', default_cfile)
+        Config.load_config(default_cfile)
     if hasattr(args, 'file_config'):
+        log.debug('Loading config from %s', args.file_config)
         Config.load_config(args.file_config)
 
 
