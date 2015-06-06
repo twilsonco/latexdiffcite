@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-'''latexdiffcite.latexdiffcite: the actual script, and the entry point main().'''
+'''latexdiffcite.latexdiffcite: the actual script, and the entry point main()'''
 
 
 from __future__ import division, print_function, absolute_import
@@ -249,6 +249,8 @@ def initiate_from_args(args):
     # paths of tex files
     Files.tex_old_path = args.file_old
     Files.tex_new_path = args.file_new or args.file_old
+    log.debug('Old tex path: %s', Files.tex_old_path)
+    log.debug('New tex path: %s', Files.tex_new_path)
 
     # path to bbl files
     if args.bbl2_path is None:
@@ -259,9 +261,12 @@ def initiate_from_args(args):
         bbl_filename = os.path.splitext(os.path.basename(Files.tex_old_path))[0] + '.bbl'
         Files.bbl_old_path = os.path.join(args.bbl_path, bbl_filename)
         Files.bbl_new_path = os.path.join(args.bbl2_path, bbl_filename)
+        log.debug('Old bbl path: %s', Files.bbl_old_path)
+        log.debug('New bbl path: %s', Files.bbl_new_path)
 
     # path to output file
     Files.out_path = args.file_out
+    log.debug('Output path: %s', Files.out_path)
 
     # load config
     Config.load_defaults()
@@ -818,4 +823,5 @@ def run_latexdiff(file1, file2):
 
 
 if __name__ == '__main__':
+    # executed if this module is run as a script
     main()
