@@ -5,6 +5,7 @@ from __future__ import division, print_function, absolute_import, unicode_litera
 
 import io
 import os
+import json
 import shutil
 import platform
 import itertools
@@ -14,7 +15,8 @@ import pytest
 
 from latexdiffcite import latexdiffcite
 
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+real_popen = subprocess.Popen
+real_json_load = json.load
 
 
 def reset_everything():
@@ -260,46 +262,87 @@ Accented characters: æÆøØåÅ äÄöÖüÜß
 #  Parametrize a test function to test combinations of encodings, styles, etc.
 # ==============================================================================
 
+
+def read_file(fname):
+    '''Generic function to read a file'''
+    with open(fname, 'r') as f:
+        return f.read()
+
+
+class mock_popen():
+    '''Used to mock subprocess.Popen'''
+
+    def __init__(self, *args, **kwargs):
+        self.args = args
+
+    def communicate(self):
+        if self.args[0][0] == 'git':
+            # called from git_show
+            fname = self.args[0][2].split(':')[1]
+            cmd, shell = ('type', True) if platform.system() == 'Windows' else ('cat', False)
+            p = real_popen([cmd, fname], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
+            return p.communicate()
+        else:
+            # called from run_latexdiff
+            return None, None
+
+    def wait(self):
+        return 0
+
+
+def generate_json_load_inject_encoding(enc):
+
+    def json_load_inject_encoding(f):
+        d = real_json_load(f)
+        d['encoding'] = enc
+        return d
+
+    return json_load_inject_encoding
+
+
 # different test cases (citation formatting)
 testcases = {
     'author_year_AGU_bib': {
-        'template_args_file': 'file -s %FILE% %FILE% -c configs/config_authyear_bib.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c configs/config_authyear_bib.json',
+        'template_args_file': 'file -s %FILE% %FILE% -c tests/configs/config_authyear_bib.json',
+        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c tests/configs/config_authyear_bib.json',
         'out_non_accented': out_author_year_agu_bib_non_accented,
         'out_accented': out_author_year_agu_bib_accented},
     'author_year_AGU_bib_alt': {
-        'template_args_file': 'file -s %FILE% %FILE% -c configs/config_authyear_bib_alt.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c configs/config_authyear_bib_alt.json',
+        'template_args_file': 'file -s %FILE% %FILE% -c tests/configs/config_authyear_bib_alt.json',
+        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c tests/configs/config_authyear_bib_alt.json',
         'out_non_accented': out_author_year_agu_bib_alt_non_accented,
         'out_accented': out_author_year_agu_bib_alt_accented},
     'author_year_AGU_bbl': {
-        'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_agu -c configs/config_authyear_bbl.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_agu -c configs/config_authyear_bbl.json',
+        'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl.json',
+        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl.json',
         'out_non_accented': out_author_year_agu_bbl_non_accented,
         'out_accented': out_author_year_agu_bbl_accented},
     'author_year_AGU_bbl_alt': {
-        'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_agu -c configs/config_authyear_bbl_alt.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_agu -c configs/config_authyear_bbl_alt.json',
+        'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl_alt.json',
+        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl_alt.json',
         'out_non_accented': out_author_year_agu_bbl_alt_non_accented,
         'out_accented': out_author_year_agu_bbl_alt_accented},
     'author_year_code': {
-        'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_code -c configs/config_code.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_code -c configs/config_code.json',
+        'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_code -c tests/configs/config_code.json',
+        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_code -c tests/configs/config_code.json',
         'out_non_accented': out_author_year_code_non_accented,
         'out_accented': out_author_year_code_accented},
     'numeric': {
-        'template_args_file': 'file -s %FILE% %FILE% -c configs/config_numeric.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c configs/config_numeric.json',
+        'template_args_file': 'file -s %FILE% %FILE% -c tests/configs/config_numeric.json',
+        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c tests/configs/config_numeric.json',
         'out_non_accented': out_numeric_non_accented,
         'out_accented': out_numeric_accented}}
 
+# encoding stuff: encoding string, accented, part of folder name
 encs = {'non_accented_ANSI': {'enc': 'ascii', 'acc': 'non_accented', 'f_enc': 'ANSI'},
         'accented_ANSI': {'enc': 'iso-8859-1', 'acc': 'accented', 'f_enc': 'ANSI'},
         'accented_UTF8': {'enc': 'utf-8', 'acc': 'accented', 'f_enc': 'UTF8'}}
+# file/git and EOL
 modes = ['file', 'git']
 eols = ['LF', 'CRLF']
 
-parameters = list(itertools.product(testcases.keys(), encs.keys(), modes, eols))
+# build all combinations of the above structures
+parameters = list(itertools.product(sorted(testcases.keys()), sorted(encs.keys()), modes, eols))
 ids = []
 for testcase, enc, mode, eol in parameters:
     ids.append('{}_{}_{}_{}'.format(testcase, enc, mode, eol))
@@ -308,16 +351,14 @@ for testcase, enc, mode, eol in parameters:
 class TestFromInputToOutput():
 
     @pytest.mark.parametrize('testcase, enc, mode, eol', parameters, ids=ids)
-    def test_case(self, mocker, testcase, enc, mode, eol):
-        mocker.patch('latexdiffcite.latexdiffcite.git_show', side_effect=mock_git_show)
+    def test_case(self, mocker, tmpdir, testcase, enc, mode, eol):
+        folder = os.path.join('tests', '{}_{}_{}'.format(encs[enc]['acc'], encs[enc]['f_enc'], eol))
+        mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
+        mocker.patch('latexdiffcite.latexdiffcite.json.load', new=generate_json_load_inject_encoding(encs[enc]['enc']))
         mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
-        mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
-        folder = '{}_{}_{}'.format(encs[enc]['acc'], encs[enc]['f_enc'], eol)
         args = testcases[testcase]['template_args_' + mode].replace('%FILE%', os.path.join(folder, 'test.tex')).split()
-        parsed_args = parser.parse_args(args)
-        latexdiffcite.initiate_from_args(parsed_args)
-        latexdiffcite.Config.encoding = encs[enc]['enc']
-        latexdiffcite.run(parsed_args)
+        args.extend(['-o', str(tmpdir.join('diff.tex'))])
+        latexdiffcite.main(args)
         latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
         latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
         out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
@@ -337,7 +378,7 @@ class TestFromInputToOutput():
 # ==============================================================================
 
 
-config_examples = os.path.join('..', 'docs', 'config_examples')
+config_examples = os.path.join('docs', 'config_examples')
 folders = [x for x in os.listdir(config_examples)
            if os.path.isdir(os.path.join(config_examples, x))]
 paths = [os.path.join(config_examples, x) for x in folders]
@@ -346,16 +387,16 @@ paths = [os.path.join(config_examples, x) for x in folders]
 class TestExamples():
 
     @pytest.mark.parametrize('folder', paths, ids=folders)
-    def test_example(self, mocker, folder):
-        mocker.patch('latexdiffcite.latexdiffcite.git_show', side_effect=mock_git_show)
+    def test_example(self, mocker, tmpdir, folder):
+        mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
         mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
-        mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
         f_tex = os.path.join(folder, 'input.tex')
         f_cfg = os.path.join(folder, 'config.json')
         f_out = os.path.join(folder, 'output.tex')
         args = ['file', f_tex, f_tex, '-c', f_cfg]
         if 'input.bbl' in os.listdir(folder):
             args.append('--bbl')
+        args.extend(['-o', str(tmpdir.join('diff.tex'))])
         parsed_args = parser.parse_args(args)
         latexdiffcite.initiate_from_args(parsed_args)
         latexdiffcite.run(parsed_args)
@@ -375,67 +416,78 @@ class TestExamples():
         latexdiffcite.Files.destroy_tempfiles()
 
 
-def test_format_authorlist_with_serialcomma(mocker):
-    mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
-    latexdiffcite.Config.bib = {
-        'max_authors': 0,  # not used
-        'sep_authors_first': ', ',
-        'author_serialcomma': True,
-        'sep_authors_last': ' and ',
-        'et_al': 'NOTUSED'
-    }
-    latexdiffcite.Config.sep_authors_first = ', '
-    latexdiffcite.Config.author_serialcomma = True
-    latexdiffcite.Config.sep_authors_last = ' and '
-    assert latexdiffcite.format_authorlist(['Foo']) == 'Foo'
-    assert latexdiffcite.format_authorlist(['Foo', 'Bar']) == 'Foo and Bar'
-    assert latexdiffcite.format_authorlist(['Foo', 'Bar', 'Baz']) == 'Foo, Bar, and Baz'
+# ==============================================================================
+#  Test specific functions for special cases
+# ==============================================================================
 
 
-def test_format_authorlist_without_serialcomma(mocker):
-    mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
-    latexdiffcite.Config.bib = {
-        'max_authors': 0,  # not used
-        'sep_authors_first': ', ',
-        'author_serialcomma': False,
-        'sep_authors_last': ' & ',
-        'et_al': 'NOTUSED'
-    }
-    assert latexdiffcite.format_authorlist(['Foo']) == 'Foo'
-    assert latexdiffcite.format_authorlist(['Foo', 'Bar']) == 'Foo & Bar'
-    assert latexdiffcite.format_authorlist(['Foo', 'Bar', 'Baz']) == 'Foo, Bar & Baz'
+class TestIndividualFunctions():
+
+    def setup(self):
+        reset_everything()
+
+    def test_format_authorlist_with_serialcomma(mocker):
+        latexdiffcite.Config.bib = {
+            'max_authors': 0,  # not used
+            'sep_authors_first': ', ',
+            'author_serialcomma': True,
+            'sep_authors_last': ' and ',
+            'et_al': 'NOTUSED'
+        }
+        latexdiffcite.Config.sep_authors_first = ', '
+        latexdiffcite.Config.author_serialcomma = True
+        latexdiffcite.Config.sep_authors_last = ' and '
+        assert latexdiffcite.format_authorlist(['Foo']) == 'Foo'
+        assert latexdiffcite.format_authorlist(['Foo', 'Bar']) == 'Foo and Bar'
+        assert latexdiffcite.format_authorlist(['Foo', 'Bar', 'Baz']) == 'Foo, Bar, and Baz'
+
+    def test_format_authorlist_without_serialcomma(mocker):
+        latexdiffcite.Config.bib = {
+            'max_authors': 0,  # not used
+            'sep_authors_first': ', ',
+            'author_serialcomma': False,
+            'sep_authors_last': ' & ',
+            'et_al': 'NOTUSED'
+        }
+        assert latexdiffcite.format_authorlist(['Foo']) == 'Foo'
+        assert latexdiffcite.format_authorlist(['Foo', 'Bar']) == 'Foo & Bar'
+        assert latexdiffcite.format_authorlist(['Foo', 'Bar', 'Baz']) == 'Foo, Bar & Baz'
+
+    def test_custom_cite_command(mocker):
+        latexdiffcite.FileContents.tex_new = r'\custom_cite{foo, bar}'
+        latexdiffcite.References.refkeys_new = []
+        latexdiffcite.Config.cmd_format = {'custom_cite': 'foo'}
+        latexdiffcite.get_all_ref_keys('new')
+        assert latexdiffcite.References.refkeys_new == ['foo', 'bar']
 
 
-def test_custom_cite_command(mocker):
-    mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
-    latexdiffcite.FileContents.tex_new = r'\custom_cite{foo, bar}'
-    latexdiffcite.References.refkeys_new = []
-    latexdiffcite.Config.cmd_format = {'custom_cite': 'foo'}
-    latexdiffcite.get_all_ref_keys('new')
-    assert latexdiffcite.References.refkeys_new == ['foo', 'bar']
+# ==============================================================================
+#  Subprocess calls: Test invocations
+# ==============================================================================
 
 
 def test_command_available():
-    p = subprocess.Popen(['latexdiffcite', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                         shell=True if platform.system() == 'Windows' else False)
+    p = subprocess.Popen(['latexdiffcite', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
 
 
 def test_run_module():
     p = subprocess.Popen(['python', '-m', 'latexdiffcite', '--version'],
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                         shell=True if platform.system() == 'Windows' else False)
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
 
 
-def test_main(tmpdir):
-    '''Tests that main(), destroy_tempfiles() and run_latexdiff() runs without error'''
-    fname = os.path.join('non_accented_ANSI_LF', 'test.tex')
-    subprocess.Popen(['latexdiffcite', 'file', fname, fname, '-o', str(tmpdir.join('diff.tex'))],
-                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                     shell=True if platform.system() == 'Windows' else False)
+#-------------------------------------------------------------------------------
+
+
+def test_main(tmpdir, mocker):
+    '''Tests the whole shebang, except actually calling latexdiff'''
+    mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
+    fname = os.path.join('tests', 'non_accented_ANSI_LF', 'test.tex')
+    latexdiffcite.main(['file', fname, fname, '-v', '-l', str(tmpdir.join('log.log')),
+                        '-o', str(tmpdir.join('diff.tex'))])
 
 
 @pytest.fixture
@@ -456,8 +508,8 @@ def test_home_conf(tmpdir, mocker, reset):
     mocker.patch('latexdiffcite.latexdiffcite.os.path.expanduser', side_effect=mock_expanduser)
     mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
     mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
-    shutil.copy(os.path.join('configs', 'config_numeric.json'), os.path.join(str(tmpdir), '.latexdiffcite.json'))
-    fname = os.path.join('non_accented_ANSI_LF', 'test.tex')
+    shutil.copy(os.path.join('tests', 'configs', 'config_numeric.json'), os.path.join(str(tmpdir), '.latexdiffcite.json'))
+    fname = os.path.join('tests', 'non_accented_ANSI_LF', 'test.tex')
     args = ['file', fname, fname]
     parsed_args = parser.parse_args(args)
     latexdiffcite.initiate_from_args(parsed_args)

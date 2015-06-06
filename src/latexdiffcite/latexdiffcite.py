@@ -160,13 +160,13 @@ class FileContents(object):
 # ==============================================================================
 
 
-def main():
+def main(args=None):
     '''Entry point for the script'''
 
     parser = create_parser()
-    args = parser.parse_args()
-    initiate_from_args(args)
-    run(args)
+    parsed_args = parser.parse_args(args)
+    initiate_from_args(parsed_args)
+    run(parsed_args)
     log.info('all done!')
 
 

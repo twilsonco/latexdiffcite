@@ -1,7 +1,7 @@
 {
     "encoding": "utf-8",
     "latexdiff_args": "NOTUSED",
-    "git_force_unix_pathsep": true,
+    "git_force_unix_pathsep": false,
     "ref_single_word": true,
     "bib": {
         "max_authors": 0,
