@@ -1,5 +1,5 @@
 | |docs| |version| |downloads| |supported-versions|
-| |travis| |appveyor| |coveralls| |landscape| |scrutinizer|
+| |travis| |appveyor| |codecov| |landscape| |scrutinizer|
 
 .. |docs| image:: https://readthedocs.org/projects/latexdiffcite/badge/?style=flat
     :target: https://readthedocs.org/projects/latexdiffcite
@@ -25,9 +25,9 @@
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/cmeeren/latexdiffcite
 
-.. |coveralls| image:: http://img.shields.io/coveralls/cmeeren/latexdiffcite/master.png?style=flat
+.. |codecov| image:: http://img.shields.io/codecov/c/cmeeren/latexdiffcite/master.png?style=flat
     :alt: Coverage Status
-    :target: https://coveralls.io/r/cmeeren/latexdiffcite
+    :target: https://codecov.io/github/cmeeren/latexdiffcite
 
 .. |landscape| image:: https://landscape.io/github/cmeeren/latexdiffcite/master/landscape.svg?style=flat
     :target: https://landscape.io/github/cmeeren/latexdiffcite/master
