@@ -179,8 +179,9 @@ def create_parser():
     parser.add_argument('--version', action='version', version='latexdiffcite version {}'.format(__version__))
 
     # add subparsers: file, git
-    subparsers = parser.add_subparsers(title='Subcommands', dest='command',
+    subparsers = parser.add_subparsers(title='Subcommands', dest='subcommand',
                                        description='for help, run %(prog)s SUBCOMMAND -h')
+    subparsers.required = True
     parser_file = subparsers.add_parser('file', help='compare two files')
     parser_git = subparsers.add_parser('git', help='compare revisions of a file in a git repository')
 
@@ -283,7 +284,7 @@ def initiate_from_args(args):
 def run(args):
     '''Replaces references in both revisions and runs latexdiff'''
 
-    if args.command == 'file':
+    if args.subcommand == 'file':
         # read revisions from disk
         read_files('tex')
         if Files.bbl_old_path and Files.bbl_new_path:
