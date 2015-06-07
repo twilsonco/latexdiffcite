@@ -49,19 +49,6 @@ def reset_everything():
     latexdiffcite.Config.load_defaults()
 
 
-def mock_git_show(fname, rev):
-    '''Replacement for git_show for testing purposes'''
-    if platform.system() == 'Windows':
-        cmd = 'type'
-        shell = True
-    else:
-        cmd = 'cat'
-        shell = False
-    p = subprocess.Popen([cmd, fname], stdout=subprocess.PIPE, shell=shell)
-    stdout, _ = p.communicate()
-    return stdout
-
-
 parser = latexdiffcite.create_parser()
 
 
@@ -536,12 +523,18 @@ class TestIndividualFunctions():
 
     def test_initiate_from_args_bbl2(self):
         '''Tests that --bbl2 optional argument is handled correctly'''
-        parser = latexdiffcite.create_parser()
         parsed_args = parser.parse_args(['file', 'foo', 'bar', '--bbl', '--bbl2', 'baz'])
 
         latexdiffcite.initiate_from_args(parsed_args)
         assert latexdiffcite.Files.bbl_old_path == 'foo.bbl'
         assert latexdiffcite.Files.bbl_new_path == os.path.join('baz', 'bar.bbl')
+
+    def test_main(self, tmpdir, mocker):
+        '''Tests the whole shebang, except actually calling latexdiff'''
+        mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
+        fname = os.path.join('tests', 'non_accented_ANSI_LF', 'test.tex')
+        latexdiffcite.main(['file', fname, fname, '-v', '-l', str(tmpdir.join('log.log')),
+                            '-o', str(tmpdir.join('diff.tex'))])
 
 # ==============================================================================
 #  Subprocess calls: Test invocations
@@ -561,15 +554,14 @@ def test_run_module():
     assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
 
 
+def test_run_script():
+    p = subprocess.Popen(['python', latexdiffcite.__file__, '--version'],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    assert 'latexdiffcite version' in str(stdout) or 'latexdiffcite version' in str(stderr)
+
+
 #-------------------------------------------------------------------------------
-
-
-def test_main(tmpdir, mocker):
-    '''Tests the whole shebang, except actually calling latexdiff'''
-    mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
-    fname = os.path.join('tests', 'non_accented_ANSI_LF', 'test.tex')
-    latexdiffcite.main(['file', fname, fname, '-v', '-l', str(tmpdir.join('log.log')),
-                        '-o', str(tmpdir.join('diff.tex'))])
 
 
 @pytest.fixture
