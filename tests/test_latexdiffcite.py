@@ -493,7 +493,7 @@ def test_home_conf(tmpdir, mocker, reset):
     mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
     mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
     shutil.copy(os.path.join('tests', 'configs', 'config_numeric.json'), os.path.join(str(tmpdir), '.latexdiffcite.json'))
-    fname = os.path.join('tests', 'ascii_lf', 'test.tex')
+    fname = os.path.join('tests', 'ascii_LF', 'test.tex')
     args = ['file', fname, fname]
     parsed_args = parser.parse_args(args)
     latexdiffcite.initiate_from_args(parsed_args)
