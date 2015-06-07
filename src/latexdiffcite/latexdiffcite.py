@@ -178,7 +178,7 @@ def create_parser():
 
     parser.add_argument('--version', action='version', version='latexdiffcite version {}'.format(__version__))
 
-    # add subparsers: file, git, test
+    # add subparsers: file, git
     subparsers = parser.add_subparsers(title='Subcommands', dest='command',
                                        description='for help, run %(prog)s SUBCOMMAND -h')
     parser_file = subparsers.add_parser('file', help='compare two files')
