@@ -11,7 +11,10 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
+.env/
+venv*/
 build/
+.build/
 develop-eggs/
 dist/
 downloads/
@@ -25,6 +28,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+bin/
+pyvenv*/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -87,7 +92,7 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
