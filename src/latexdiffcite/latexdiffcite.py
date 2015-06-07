@@ -4,7 +4,7 @@
 '''latexdiffcite.latexdiffcite: the actual script, and the entry point main()'''
 
 
-from __future__ import division, print_function, absolute_import
+from __future__ import division, print_function, absolute_import, unicode_literals
 
 import io
 import os
@@ -127,10 +127,6 @@ class Files(object):
             tmpfile = tempfile.NamedTemporaryFile(delete=False, prefix='tmp_' + rev + '_', suffix='.tex')
             log.debug('created temp file %s', tmpfile.name)
             setattr(Files, 'tex_' + rev + '_tmp_path', tmpfile.name)
-            # NamedTemporaryFile doesn't support encoding argument on Python 2.7,
-            # so close and re-open it in the desired encoding
-            tmpfile.close()
-            tmpfile = io.open(tmpfile.name, 'r+', encoding=Config.encoding)
             setattr(Files, 'tex_' + rev + '_tmp_hndl', tmpfile)
 
     @staticmethod
@@ -304,6 +300,7 @@ def run(args):
         run_latexdiff(Files.tex_old_tmp_path, Files.tex_new_tmp_path)
     finally:
         Files.destroy_tempfiles()
+        pass
 
 
 def read_files(ext):
@@ -312,6 +309,8 @@ def read_files(ext):
     for rev in ['old', 'new']:
         fname = getattr(Files, '{ext}_{rev}_path'.format(ext=ext, rev=rev))
         log.debug('reading %s', fname)
+        # TODO: check if the encoding is needed here - maybe we can use f.read().decode(Config.encoding)
+        # instead of io.open
         with io.open(fname, 'r', encoding=Config.encoding) as f:
             setattr(FileContents, '{ext}_{rev}'.format(ext=ext, rev=rev), f.read())
 
@@ -322,8 +321,8 @@ def git_extract(ext, revs):
     for oldnew, rev in zip(['old', 'new'], revs):
         fname = getattr(Files, '{ext}_{oldnew}_path'.format(ext=ext, oldnew=oldnew))
         log.debug('running git show %s:%s', rev, fname)
-        setattr(FileContents, '{ext}_{oldnew}'.format(ext=ext, oldnew=oldnew),
-                git_show(fname, rev).decode(Config.encoding).replace('\r\n', '\n'))
+        contents = git_show(fname, rev).decode(Config.encoding).replace('\r\n', '\n')
+        setattr(FileContents, '{ext}_{oldnew}'.format(ext=ext, oldnew=oldnew), contents)
 
 
 def git_show(fname, rev):
@@ -805,7 +804,7 @@ def write_tex_to_temp(oldnew):
     '''Writes processed file contents to temp files'''
 
     log.debug('writing to file %s', getattr(Files, 'tex_' + oldnew + '_tmp_path'))
-    getattr(Files, 'tex_' + oldnew + '_tmp_hndl').write(getattr(FileContents, 'tex_' + oldnew))
+    getattr(Files, 'tex_' + oldnew + '_tmp_hndl').write(getattr(FileContents, 'tex_' + oldnew).encode('utf-8'))
 
 
 def run_latexdiff(file1, file2):
@@ -816,7 +815,7 @@ def run_latexdiff(file1, file2):
         args.append(Config.latexdiff_args)
     log.info('running %s', ' '.join(args))
     log.debug('sending result to %s', Files.out_path)
-    with io.open(Files.out_path, 'w', encoding=Config.encoding) as f:
+    with io.open(Files.out_path, 'w', encoding='utf-8') as f:
         process = subprocess.Popen(args, stdout=f, stderr=subprocess.PIPE)
         _, stderr = process.communicate()
         ret_code = process.wait()

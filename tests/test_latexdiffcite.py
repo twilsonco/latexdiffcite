@@ -7,7 +7,6 @@ import io
 import os
 import json
 import shutil
-import platform
 import itertools
 import subprocess
 
@@ -17,6 +16,7 @@ from latexdiffcite import latexdiffcite
 
 real_popen = subprocess.Popen
 real_json_load = json.load
+real_destroy_tempfiles = latexdiffcite.Files.destroy_tempfiles
 
 
 def reset_everything():
@@ -56,7 +56,8 @@ parser = latexdiffcite.create_parser()
 #  Outputs
 # ==============================================================================
 
-out_author_year_agu_bib_non_accented = r'''
+out_author_year_agu_bib = r'''
+\documentclass{article}
 \begin{document}
 Same-author references are cool [\textit{Foo}, 2010; \textit{Foo and Bar}, 2011a, b, 2012; \textit{Foo et al.}, 2011; \textit{Bar and Baz}, 2013].
 citet is pretty awesome too, according to \textit{Foo} [2010] (and later confirmed by \textit{Bar and Baz} [2013]).
@@ -66,28 +67,14 @@ Postnote only [\textit{Foo}, 2010, and references therein].
 Testing spaces [pre \textit{Foo and Bar}, 2011a; \textit{Bar and Baz}, 2013, post].
 Testing commented-out stuff % \cite{notused}
 Testing multi-line stuff [\textit{Foo}, 2010; \textit{Foo et al.}, 2011; \textit{Bar and Baz}, 2013]
+{ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
 \nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
 \end{document}
 '''
 
-out_author_year_agu_bib_accented = r'''
-\begin{document}
-Same-author references are cool [\textit{Foo}, 2010; \textit{Föø and Bår}, 2011a, b, 2012; \textit{Foo et al.}, 2011; \textit{Bar and Baz}, 2013].
-citet is pretty awesome too, according to \textit{Foo} [2010] (and later confirmed by \textit{Bar and Baz} [2013]).
-Prenote only [e.g. \textit{Föø and Bår}, 2011a].
-Pre- and postnote [e.g. \textit{Föø and Bår}, 2011b; \textit{Foo et al.}, 2011, and references therein].
-Postnote only [\textit{Foo}, 2010, and references therein].
-Testing spaces [pre \textit{Föø and Bår}, 2011a; \textit{Bar and Baz}, 2013, post].
-Testing commented-out stuff % \cite{notused}
-Testing multi-line stuff [\textit{Foo}, 2010; \textit{Foo et al.}, 2011; \textit{Bar and Baz}, 2013]
-Accented characters: æÆøØåÅ äÄöÖüÜß
-\bibliography{bibl1, bibl2}
-\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
-\end{document}
-'''
-
-out_author_year_agu_bib_alt_non_accented = r'''
+out_author_year_agu_bib_alt = r'''
+\documentclass{article}
 \newcommand{\ldiffentity}[1]{#1}
 \begin{document}
 Same-author references are cool (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \textit{Foo and Bar} \ldiffentity{2011a} \ldiffentity{b} \ldiffentity{2012}; \ldiffentity{\textit{Foo, Bar, and Baz} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}).
@@ -98,28 +85,14 @@ Postnote only (\ldiffentity{\textit{Foo} \ldiffentity{2010}}, and references the
 Testing spaces (pre \ldiffentity{\textit{Foo and Bar} \ldiffentity{2011a}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}, post).
 Testing commented-out stuff % \cite{notused}
 Testing multi-line stuff (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \ldiffentity{\textit{Foo, Bar, and Baz} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}})
-\bibliography{bibl1, bibl2}
-\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
-\end{document}
-'''
-out_author_year_agu_bib_alt_accented = r'''
-\newcommand{\ldiffentity}[1]{#1}
-\begin{document}
-Same-author references are cool (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \textit{Föø and Bår} \ldiffentity{2011a} \ldiffentity{b} \ldiffentity{2012}; \ldiffentity{\textit{Foo, Bar, and Baz} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}).
-citet is pretty awesome too, according to \ldiffentity{\textit{Foo} (\ldiffentity{2010})} (and later confirmed by \ldiffentity{\textit{Bar and Baz} (\ldiffentity{2013})}).
-Prenote only (e.g. \ldiffentity{\textit{Föø and Bår} \ldiffentity{2011a}}).
-Pre- and postnote (e.g. \ldiffentity{\textit{Föø and Bår} \ldiffentity{2011b}}; \ldiffentity{\textit{Foo, Bar, and Baz} \ldiffentity{2011}}, and references therein).
-Postnote only (\ldiffentity{\textit{Foo} \ldiffentity{2010}}, and references therein).
-Testing spaces (pre \ldiffentity{\textit{Föø and Bår} \ldiffentity{2011a}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}, post).
-Testing commented-out stuff % \cite{notused}
-Testing multi-line stuff (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \ldiffentity{\textit{Foo, Bar, and Baz} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}})
-Accented characters: æÆøØåÅ äÄöÖüÜß
+{ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
 \nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
 \end{document}
 '''
 
-out_author_year_agu_bbl_non_accented = r'''
+out_author_year_agu_bbl = r'''
+\documentclass{article}
 \begin{document}
 Same-author references are cool [\textit{Foo}, 2010; \textit{Foo and Bar}, 2011a, b, 2012; \textit{Foo et~al.}, 2011; \textit{Bar and Baz}, 2013].
 citet is pretty awesome too, according to \textit{Foo} [2010] (and later confirmed by \textit{Bar and Baz} [2013]).
@@ -129,28 +102,14 @@ Postnote only [\textit{Foo}, 2010, and references therein].
 Testing spaces [pre \textit{Foo and Bar}, 2011a; \textit{Bar and Baz}, 2013, post].
 Testing commented-out stuff % \cite{notused}
 Testing multi-line stuff [\textit{Foo}, 2010; \textit{Foo et~al.}, 2011; \textit{Bar and Baz}, 2013]
+{ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
 \nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
 \end{document}
 '''
 
-out_author_year_agu_bbl_accented = r'''
-\begin{document}
-Same-author references are cool [\textit{Foo}, 2010; \textit{Föø and Bår}, 2011a, b, 2012; \textit{Foo et~al.}, 2011; \textit{Bar and Baz}, 2013].
-citet is pretty awesome too, according to \textit{Foo} [2010] (and later confirmed by \textit{Bar and Baz} [2013]).
-Prenote only [e.g. \textit{Föø and Bår}, 2011a].
-Pre- and postnote [e.g. \textit{Föø and Bår}, 2011b; \textit{Foo et~al.}, 2011, and references therein].
-Postnote only [\textit{Foo}, 2010, and references therein].
-Testing spaces [pre \textit{Föø and Bår}, 2011a; \textit{Bar and Baz}, 2013, post].
-Testing commented-out stuff % \cite{notused}
-Testing multi-line stuff [\textit{Foo}, 2010; \textit{Foo et~al.}, 2011; \textit{Bar and Baz}, 2013]
-Accented characters: æÆøØåÅ äÄöÖüÜß
-\bibliography{bibl1, bibl2}
-\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
-\end{document}
-'''
-
-out_author_year_agu_bbl_alt_non_accented = r'''
+out_author_year_agu_bbl_alt = r'''
+\documentclass{article}
 \newcommand{\ldiffentity}[1]{#1}
 \begin{document}
 Same-author references are cool (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \textit{Foo and Bar} \ldiffentity{2011a} \ldiffentity{b} \ldiffentity{2012}; \ldiffentity{\textit{Foo et~al.} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}).
@@ -161,29 +120,14 @@ Postnote only (\ldiffentity{\textit{Foo} \ldiffentity{2010}}, and references the
 Testing spaces (pre \ldiffentity{\textit{Foo and Bar} \ldiffentity{2011a}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}, post).
 Testing commented-out stuff % \cite{notused}
 Testing multi-line stuff (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \ldiffentity{\textit{Foo et~al.} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}})
+{ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
 \nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
 \end{document}
 '''
 
-out_author_year_agu_bbl_alt_accented = r'''
-\newcommand{\ldiffentity}[1]{#1}
-\begin{document}
-Same-author references are cool (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \textit{Föø and Bår} \ldiffentity{2011a} \ldiffentity{b} \ldiffentity{2012}; \ldiffentity{\textit{Foo et~al.} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}).
-citet is pretty awesome too, according to \ldiffentity{\textit{Foo} (\ldiffentity{2010})} (and later confirmed by \ldiffentity{\textit{Bar and Baz} (\ldiffentity{2013})}).
-Prenote only (e.g. \ldiffentity{\textit{Föø and Bår} \ldiffentity{2011a}}).
-Pre- and postnote (e.g. \ldiffentity{\textit{Föø and Bår} \ldiffentity{2011b}}; \ldiffentity{\textit{Foo et~al.} \ldiffentity{2011}}, and references therein).
-Postnote only (\ldiffentity{\textit{Foo} \ldiffentity{2010}}, and references therein).
-Testing spaces (pre \ldiffentity{\textit{Föø and Bår} \ldiffentity{2011a}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}, post).
-Testing commented-out stuff % \cite{notused}
-Testing multi-line stuff (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \ldiffentity{\textit{Foo et~al.} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}})
-Accented characters: æÆøØåÅ äÄöÖüÜß
-\bibliography{bibl1, bibl2}
-\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
-\end{document}
-'''
-
-out_author_year_code_non_accented = r'''
+out_author_year_code = r'''
+\documentclass{article}
 \begin{document}
 Same-author references are cool [Foo10, Foo11a, Foo11b, Foo12, Foo11c, Bar13].
 citet is pretty awesome too, according to [Foo10] (and later confirmed by [Bar13]).
@@ -193,28 +137,14 @@ Postnote only [Foo10, and references therein].
 Testing spaces [pre Foo11a, Bar13, post].
 Testing commented-out stuff % \cite{notused}
 Testing multi-line stuff [Foo10, Foo11c, Bar13]
+{ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
 \nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
 \end{document}
 '''
 
-out_author_year_code_accented = r'''
-\begin{document}
-Same-author references are cool [Foo10, Foo11a, Foo11b, Foo12, Foo11c, Bar13].
-citet is pretty awesome too, according to [Foo10] (and later confirmed by [Bar13]).
-Prenote only [e.g. Foo11a].
-Pre- and postnote [e.g. Foo11b, Foo11c, and references therein].
-Postnote only [Foo10, and references therein].
-Testing spaces [pre Foo11a, Bar13, post].
-Testing commented-out stuff % \cite{notused}
-Testing multi-line stuff [Foo10, Foo11c, Bar13]
-Accented characters: æÆøØåÅ äÄöÖüÜß
-\bibliography{bibl1, bibl2}
-\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
-\end{document}
-'''
-
-out_numeric_non_accented = r'''
+out_numeric = r'''
+\documentclass{article}
 \begin{document}
 Same-author references are cool [1, 2, 3, 4, 5, 6].
 citet is pretty awesome too, according to [1] (and later confirmed by [6]).
@@ -224,22 +154,7 @@ Postnote only [1, and references therein].
 Testing spaces [pre 2, 6, post].
 Testing commented-out stuff % \cite{notused}
 Testing multi-line stuff [1, 5, 6]
-\bibliography{bibl1, bibl2}
-\nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
-\end{document}
-'''
-
-out_numeric_accented = r'''
-\begin{document}
-Same-author references are cool [1, 2, 3, 4, 5, 6].
-citet is pretty awesome too, according to [1] (and later confirmed by [6]).
-Prenote only [e.g. 2].
-Pre- and postnote [e.g. 3, 5, and references therein].
-Postnote only [1, and references therein].
-Testing spaces [pre 2, 6, post].
-Testing commented-out stuff % \cite{notused}
-Testing multi-line stuff [1, 5, 6]
-Accented characters: æÆøØåÅ äÄöÖüÜß
+{ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
 \nocite{foo2010,foo2011lorem,foo2011ipsum,foo2012,foo2011dolor,bar2013}
 \end{document}
@@ -261,14 +176,12 @@ class mock_popen():
 
     def __init__(self, *args, **kwargs):
         self.args = args
+        self.kwargs = kwargs
 
     def communicate(self):
         if self.args[0][0] == 'git':
             # called from git_show
-            fname = self.args[0][2].split(':')[1]
-            cmd, shell = ('type', True) if platform.system() == 'Windows' else ('cat', False)
-            p = real_popen([cmd, fname], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell)
-            return p.communicate()
+            return real_popen([x.replace('HEAD', '') for x in self.args[0]], **self.kwargs).communicate()
         else:
             # called from run_latexdiff
             return None, None
@@ -291,39 +204,33 @@ def generate_json_load_inject_encoding(enc):
 testcases = {
     'author_year_AGU_bib': {
         'template_args_file': 'file -s %FILE% %FILE% -c tests/configs/config_authyear_bib.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c tests/configs/config_authyear_bib.json',
-        'out_non_accented': out_author_year_agu_bib_non_accented,
-        'out_accented': out_author_year_agu_bib_accented},
+        'template_args_git': 'git -s %FILE% HEAD HEAD -c tests/configs/config_authyear_bib.json',
+        'out': out_author_year_agu_bib},
     'author_year_AGU_bib_alt': {
         'template_args_file': 'file -s %FILE% %FILE% -c tests/configs/config_authyear_bib_alt.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c tests/configs/config_authyear_bib_alt.json',
-        'out_non_accented': out_author_year_agu_bib_alt_non_accented,
-        'out_accented': out_author_year_agu_bib_alt_accented},
+        'template_args_git': 'git -s %FILE% HEAD HEAD -c tests/configs/config_authyear_bib_alt.json',
+        'out': out_author_year_agu_bib_alt},
     'author_year_AGU_bbl': {
         'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl.json',
-        'out_non_accented': out_author_year_agu_bbl_non_accented,
-        'out_accented': out_author_year_agu_bbl_accented},
+        'template_args_git': 'git -s %FILE% HEAD HEAD --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl.json',
+        'out': out_author_year_agu_bbl},
     'author_year_AGU_bbl_alt': {
         'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl_alt.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl_alt.json',
-        'out_non_accented': out_author_year_agu_bbl_alt_non_accented,
-        'out_accented': out_author_year_agu_bbl_alt_accented},
+        'template_args_git': 'git -s %FILE% HEAD HEAD --bbl bbl_authyear_agu -c tests/configs/config_authyear_bbl_alt.json',
+        'out': out_author_year_agu_bbl_alt},
     'author_year_code': {
         'template_args_file': 'file -s %FILE% %FILE% --bbl bbl_authyear_code -c tests/configs/config_code.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED --bbl bbl_authyear_code -c tests/configs/config_code.json',
-        'out_non_accented': out_author_year_code_non_accented,
-        'out_accented': out_author_year_code_accented},
+        'template_args_git': 'git -s %FILE% HEAD HEAD --bbl bbl_authyear_code -c tests/configs/config_code.json',
+        'out': out_author_year_code},
     'numeric': {
         'template_args_file': 'file -s %FILE% %FILE% -c tests/configs/config_numeric.json',
-        'template_args_git': 'git -s %FILE% NOTUSED NOTUSED -c tests/configs/config_numeric.json',
-        'out_non_accented': out_numeric_non_accented,
-        'out_accented': out_numeric_accented}}
+        'template_args_git': 'git -s %FILE% HEAD HEAD -c tests/configs/config_numeric.json',
+        'out': out_numeric}}
 
-# encoding stuff: encoding string, accented, part of folder name
-encs = {'non_accented_ANSI': {'enc': 'ascii', 'acc': 'non_accented', 'f_enc': 'ANSI'},
-        'accented_ANSI': {'enc': 'iso-8859-1', 'acc': 'accented', 'f_enc': 'ANSI'},
-        'accented_UTF8': {'enc': 'utf-8', 'acc': 'accented', 'f_enc': 'UTF8'}}
+# encoding stuff: what to insert into the output check
+encs = {'ascii': '',
+        'latin-1': 'æÆøØåÅ äÄöÖüÜß',
+        'utf-8': 'æÆøØåÅ äÄöÖüÜß ひらがな'}
 # file/git and EOL
 modes = ['file', 'git']
 eols = ['LF', 'CRLF']
@@ -335,29 +242,32 @@ for testcase, enc, mode, eol in parameters:
     ids.append('{}_{}_{}_{}'.format(testcase, enc, mode, eol))
 
 
-class TestFromInputToOutput():
+class TestHolistic():
 
     @pytest.mark.parametrize('testcase, enc, mode, eol', parameters, ids=ids)
     def test_case(self, mocker, tmpdir, testcase, enc, mode, eol):
-        folder = os.path.join('tests', '{}_{}_{}'.format(encs[enc]['acc'], encs[enc]['f_enc'], eol))
+        folder = os.path.join('tests', '{}_{}'.format(enc, eol))
         mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
-        mocker.patch('latexdiffcite.latexdiffcite.json.load', new=generate_json_load_inject_encoding(encs[enc]['enc']))
+        mocker.patch('latexdiffcite.latexdiffcite.json.load', new=generate_json_load_inject_encoding(enc))
         mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
         args = testcases[testcase]['template_args_' + mode].replace('%FILE%', os.path.join(folder, 'test.tex')).split()
         args.extend(['-o', str(tmpdir.join('diff.tex'))])
         latexdiffcite.main(args)
         latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
         latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
-        out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
-        out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
-        assert out_old == testcases[testcase]['out_' + encs[enc]['acc']]
-        assert out_new == testcases[testcase]['out_' + encs[enc]['acc']]
+        out_old = latexdiffcite.Files.tex_old_tmp_hndl.read().decode('utf-8')
+        out_new = latexdiffcite.Files.tex_new_tmp_hndl.read().decode('utf-8')
+        out_true = testcases[testcase]['out'].replace('{ACCENTED_CHARACTERS}', encs[enc])
+        if enc != 'ascii':
+            out_true = out_true.replace('Foo and Bar', 'Föø and Bår')
+        assert out_old == out_true
+        assert out_new == out_true
 
     def setup(self):
         reset_everything()
 
     def teardown(self):
-        latexdiffcite.Files.destroy_tempfiles()
+        real_destroy_tempfiles()
 
 
 # ==============================================================================
@@ -389,8 +299,8 @@ class TestExamples():
         latexdiffcite.run(parsed_args)
         latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
         latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
-        out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
-        out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
+        out_old = latexdiffcite.Files.tex_old_tmp_hndl.read().decode('utf-8')
+        out_new = latexdiffcite.Files.tex_new_tmp_hndl.read().decode('utf-8')
         with io.open(f_out, encoding=latexdiffcite.Config.encoding) as f:
             out_answer = f.read()
         assert out_old == out_answer
@@ -400,7 +310,7 @@ class TestExamples():
         reset_everything()
 
     def teardown(self):
-        latexdiffcite.Files.destroy_tempfiles()
+        real_destroy_tempfiles()
 
 
 # ==============================================================================
@@ -532,7 +442,7 @@ class TestIndividualFunctions():
     def test_main(self, tmpdir, mocker):
         '''Tests the whole shebang, except actually calling latexdiff'''
         mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen', new=mock_popen)
-        fname = os.path.join('tests', 'non_accented_ANSI_LF', 'test.tex')
+        fname = os.path.join('tests', 'utf-8_LF', 'test.tex')
         latexdiffcite.main(['file', fname, fname, '-v', '-l', str(tmpdir.join('log.log')),
                             '-o', str(tmpdir.join('diff.tex'))])
 
@@ -569,7 +479,7 @@ def reset(request):
     reset_everything()
 
     def destroy_tempfiles():
-        latexdiffcite.Files.destroy_tempfiles()
+        real_destroy_tempfiles()
 
     request.addfinalizer(destroy_tempfiles)
 
@@ -583,14 +493,15 @@ def test_home_conf(tmpdir, mocker, reset):
     mocker.patch('latexdiffcite.latexdiffcite.Files.destroy_tempfiles')
     mocker.patch('latexdiffcite.latexdiffcite.run_latexdiff')
     shutil.copy(os.path.join('tests', 'configs', 'config_numeric.json'), os.path.join(str(tmpdir), '.latexdiffcite.json'))
-    fname = os.path.join('tests', 'non_accented_ANSI_LF', 'test.tex')
+    fname = os.path.join('tests', 'ascii_lf', 'test.tex')
     args = ['file', fname, fname]
     parsed_args = parser.parse_args(args)
     latexdiffcite.initiate_from_args(parsed_args)
     latexdiffcite.run(parsed_args)
     latexdiffcite.Files.tex_old_tmp_hndl.seek(0)
     latexdiffcite.Files.tex_new_tmp_hndl.seek(0)
-    out_old = latexdiffcite.Files.tex_old_tmp_hndl.read()
-    out_new = latexdiffcite.Files.tex_new_tmp_hndl.read()
-    assert out_old == out_numeric_non_accented
-    assert out_new == out_numeric_non_accented
+    out_old = latexdiffcite.Files.tex_old_tmp_hndl.read().decode('utf-8')
+    out_new = latexdiffcite.Files.tex_new_tmp_hndl.read().decode('utf-8')
+    out_true = out_numeric.replace('{ACCENTED_CHARACTERS}', '')
+    assert out_old == out_true
+    assert out_new == out_true
