@@ -176,7 +176,7 @@ def create_parser():
                                      description='Replaces \\cite{} commands in two files with properly formatted '
                                                  'references and calls latexdiff on the result')
 
-    parser.add_argument('-V', '--version', action='version', version='latexdiffcite version {}'.format(__version__))
+    parser.add_argument('--version', action='version', version='latexdiffcite version {}'.format(__version__))
 
     # add subparsers: file, git, test
     subparsers = parser.add_subparsers(title='Subcommands', dest='command',
