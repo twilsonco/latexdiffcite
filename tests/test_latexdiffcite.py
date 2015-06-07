@@ -426,7 +426,7 @@ class TestIndividualFunctions():
     def setup(self):
         reset_everything()
 
-    def test_format_authorlist_with_serialcomma(mocker):
+    def test_format_authorlist_with_serialcomma(self, mocker):
         latexdiffcite.Config.bib = {
             'max_authors': 0,  # not used
             'sep_authors_first': ', ',
@@ -441,7 +441,7 @@ class TestIndividualFunctions():
         assert latexdiffcite.format_authorlist(['Foo', 'Bar']) == 'Foo and Bar'
         assert latexdiffcite.format_authorlist(['Foo', 'Bar', 'Baz']) == 'Foo, Bar, and Baz'
 
-    def test_format_authorlist_without_serialcomma(mocker):
+    def test_format_authorlist_without_serialcomma(self, mocker):
         latexdiffcite.Config.bib = {
             'max_authors': 0,  # not used
             'sep_authors_first': ', ',
@@ -453,13 +453,95 @@ class TestIndividualFunctions():
         assert latexdiffcite.format_authorlist(['Foo', 'Bar']) == 'Foo & Bar'
         assert latexdiffcite.format_authorlist(['Foo', 'Bar', 'Baz']) == 'Foo, Bar & Baz'
 
-    def test_custom_cite_command(mocker):
+    def test_custom_cite_command(self, mocker):
         latexdiffcite.FileContents.tex_new = r'\custom_cite{foo, bar}'
         latexdiffcite.References.refkeys_new = []
         latexdiffcite.Config.cmd_format = {'custom_cite': 'foo'}
         latexdiffcite.get_all_ref_keys('new')
         assert latexdiffcite.References.refkeys_new == ['foo', 'bar']
 
+    def test_git_force_unix_pathsep(self, mocker):
+        '''Test that path separators are correctly handled based on Config.git_force_unix_pathsep'''
+        mocked_popen = mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen')
+        mocked_popen.return_value.communicate.return_value = None, None
+        mocked_popen.return_value.wait.return_value = 0
+
+        # test that file endings are converted
+        latexdiffcite.Config.git_force_unix_pathsep = True
+        latexdiffcite.git_show('path\\to\\file.tex', 'HEAD')
+        args, kwargs = mocked_popen.call_args
+        assert args[0] == ['git', 'show', 'HEAD:path/to/file.tex']
+
+        # test that file endings are not converted
+        latexdiffcite.Config.git_force_unix_pathsep = False
+        latexdiffcite.git_show('path\\to\\file.tex', 'HEAD')
+        args, kwargs = mocked_popen.call_args
+        assert args[0] == ['git', 'show', 'HEAD:path\\to\\file.tex']
+
+    def test_git_show_retcode_exception(self, mocker):
+        '''Test exception raised when git has nonzero return code'''
+        mocked_popen = mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen')
+        mocked_popen.return_value.communicate.return_value = 'stdout', 'stderr'
+        mocked_popen.return_value.wait.return_value = 1
+        with pytest.raises(ValueError):
+            latexdiffcite.git_show('foo', 'bar')
+
+    def test_run_latexdiff_retcode_exception(self, mocker):
+        '''Test exception raised when latexdiff has nonzero return code'''
+        mocked_popen = mocker.patch('latexdiffcite.latexdiffcite.subprocess.Popen')
+        mocked_popen.return_value.communicate.return_value = 'stdout', 'stderr'
+        mocked_popen.return_value.wait.return_value = 1
+        mocked_popen = mocker.patch('latexdiffcite.latexdiffcite.io.open', autospec=True)
+        latexdiffcite.Files.out_path = 'foo'
+        with pytest.raises(ValueError):
+            latexdiffcite.run_latexdiff('foo', 'bar')
+
+    def test_get_capture_groups_from_bbl_key_not_in_file(self):
+        '''Tests exception raised when reference does not exist in the bbl file'''
+        latexdiffcite.FileContents.bbl_old = 'foo'
+        latexdiffcite.References.refkeys_old = ['bar']
+        with pytest.raises(ValueError):
+            latexdiffcite.get_capture_groups_from_bbl('old')
+
+    def test_get_capture_groups_from_bbl_wrong_regex(self):
+        '''Tests exception raised when reference is not matched in bbl file by the regex'''
+        latexdiffcite.Config.bbl['regex'] = r'baz%REFKEY%'
+        latexdiffcite.FileContents.bbl_old = 'foo'
+        latexdiffcite.References.refkeys_old = ['foo']
+        with pytest.raises(ValueError):
+            latexdiffcite.get_capture_groups_from_bbl('old')
+
+    def test_find_bibfiles_not_found(self):
+        '''Test exception raised when bibfiles are not found'''
+        latexdiffcite.Files.tex_old_path = ''
+        latexdiffcite.References.refkeys_old = ['foo']
+        with pytest.raises(IOError):
+            latexdiffcite.find_bibfiles('bibfile', 'old')
+        with pytest.raises(IOError):
+            latexdiffcite.find_bibfiles('bib1, bib2', 'old')
+
+    def test_make_author_year_tokens_from_bib_no_bibfiles(self):
+        '''Tests a path that should never happen, but required to reach 100% test coverage, so why not
+        (basically, tests exception raised when searching for refs in bibfiles when there are no bibfiles)'''
+        latexdiffcite.References.refkeys_old = ['foo']
+        with pytest.raises(ValueError):
+            latexdiffcite.make_author_year_tokens_from_bib('old')
+
+    def test_make_author_year_tokens_from_bib_not_found(self):
+        '''Tests exception raised when reference does not exist in bib file(s)'''
+        latexdiffcite.References.refkeys_old = ['foo']
+        latexdiffcite.FileContents.bib_old = ['bar']
+        with pytest.raises(ValueError):
+            latexdiffcite.make_author_year_tokens_from_bib('old')
+
+    def test_initiate_from_args_bbl2(self):
+        '''Tests that --bbl2 optional argument is handled correctly'''
+        parser = latexdiffcite.create_parser()
+        parsed_args = parser.parse_args(['file', 'foo', 'bar', '--bbl', '--bbl2', 'baz'])
+
+        latexdiffcite.initiate_from_args(parsed_args)
+        assert latexdiffcite.Files.bbl_old_path == 'foo.bbl'
+        assert latexdiffcite.Files.bbl_new_path == os.path.join('baz', 'bar.bbl')
 
 # ==============================================================================
 #  Subprocess calls: Test invocations

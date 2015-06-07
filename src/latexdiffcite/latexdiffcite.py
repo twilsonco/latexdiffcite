@@ -259,8 +259,9 @@ def initiate_from_args(args):
         args.bbl_path = os.path.join(os.path.dirname(Files.tex_old_path), args.bbl_path)
         args.bbl2_path = os.path.join(os.path.dirname(Files.tex_new_path), args.bbl2_path)
         bbl_filename = os.path.splitext(os.path.basename(Files.tex_old_path))[0] + '.bbl'
+        bbl2_filename = os.path.splitext(os.path.basename(Files.tex_new_path))[0] + '.bbl'
         Files.bbl_old_path = os.path.join(args.bbl_path, bbl_filename)
-        Files.bbl_new_path = os.path.join(args.bbl2_path, bbl_filename)
+        Files.bbl_new_path = os.path.join(args.bbl2_path, bbl2_filename)
         log.debug('Old bbl path: %s', Files.bbl_old_path)
         log.debug('New bbl path: %s', Files.bbl_new_path)
 
@@ -337,7 +338,7 @@ def git_show(fname, rev):
     stdout, stderr = process.communicate()
     ret_code = process.wait()
     if ret_code:
-        raise Exception('git returned with code {}. Error from git:\n\n'.format(ret_code) + stderr)
+        raise ValueError('git returned with code {}. Error from git:\n\n'.format(ret_code) + stderr)
     return stdout
 
 
@@ -423,7 +424,7 @@ def get_capture_groups_from_bbl(oldnew):
 
         # crap out if the reference isn't found in the bbl file
         if ref not in bbl_contents:
-            raise LookupError('Reference \'' + ref + '\' not present in bbl file')
+            raise ValueError('Reference \'' + ref + '\' not present in bbl file')
 
         # regex pattern to look for the correct entry
         exp = Config.bbl['regex'].replace('%REFKEY%', ref)
@@ -598,7 +599,7 @@ def make_author_year_tokens_from_bib(oldnew):
 
         # crap out if the reference isn't found in any bib file
         if not ref_found:
-            raise LookupError('Reference \'' + ref + '\' not found in any bibtex file')
+            raise ValueError('Reference \'' + ref + '\' not found in any bibtex file')
 
     setattr(References, 'authyear_' + oldnew, authyear)
 
@@ -819,7 +820,7 @@ def run_latexdiff(file1, file2):
         _, stderr = process.communicate()
         ret_code = process.wait()
         if ret_code:
-            raise Exception('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + stderr)
+            raise ValueError('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + stderr)
 
 
 if __name__ == '__main__':
