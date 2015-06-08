@@ -83,8 +83,6 @@ class Config(object):
     @staticmethod
     def load_config(json_file):
         '''Loads settings from config file'''
-        if json_file is None:
-            return
         with io.open(json_file, 'r', encoding=Config.encoding) as f:
             config = json.load(f)
         for k, v in config.items():
