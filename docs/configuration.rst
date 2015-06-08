@@ -83,7 +83,7 @@ Description of the settings
 ---------------------------
 
 ``encoding``
-    The `encoding <https://docs.python.org/3.4/library/codecs.html#standard-encodings>`_ used to read and write all files (and decode output from ``git show``). Only change this if you experience encoding problems.
+    The `encoding <https://docs.python.org/3.4/library/codecs.html#standard-encodings>`_ used to read all files (and decode output from ``git show``). Only change this if you experience encoding problems.
 ``latexdiff_args``
     Extra arguments to pass to `latexdiff`.
 ``git_force_unix_pathsep``
