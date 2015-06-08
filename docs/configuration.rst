@@ -139,7 +139,7 @@ Description of the settings
 
         ``%YEAR%``
             Will be replaced by the year (e.g. ``2011``, ``2013a``).
-        ``%CG1%``, ``%CG2%``, etc.
+        ``%CG1%``, ``%CG2%``, ...
             Will be replaced by the corresponding capture groups from the regex (only if using ``--bbl`` mode)
 
     ``sep_same_author_year``

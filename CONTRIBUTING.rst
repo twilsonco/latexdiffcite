@@ -19,7 +19,7 @@ When `reporting a bug <https://github.com/cmeeren/latexdiffcite/issues>`_ please
 * any details about your local setup that might be helpful in troubleshooting
 * detailed steps to reproduce the bug, which could include:
 
-  * log file (run with ``-v -l`` flags, check that it doesn't contain personal details)
+  * log file (use the ``-l`` option, check that it doesn't contain personal details)
   * the problematic part of your ``.tex`` file, ``.bib`` file and/or ``.bbl`` file
 
 Documentation improvements
@@ -27,9 +27,9 @@ Documentation improvements
 
 Feel free to add additional configuration examples. This should include, in the style of the existing examples, a minimal working example (no more than the bare minimum to get it working and show how the configuration behaves). You must include:
 
-* the contents of the configuration file (include all relevant settings -- don't rely on `latexdiffcite`'s defaults to stay consistent across versions)
-* the contents of an example ``.tex`` file
-* the contents of an example ``.bib`` file or ``.bbl`` file
+* the configuration file (include all relevant settings -- don't rely on `latexdiffcite`'s defaults to stay consistent across versions)
+* an example ``.bib`` file or ``.bbl`` file
+* an example ``.tex`` file
 * the output `latexdiffcite` would produce after replacing citation commands
 
 Please run your JSON through a `JSON validator and formatter <http://jsonlint.com>`_ before adding it to the docs.
@@ -50,7 +50,7 @@ Development
 
 To set up `latexdiffcite` for local development:
 
-1. `Fork `latexdiffcite` on GitHub <https://github.com/cmeeren/latexdiffcite/fork>`_.
+1. Fork `latexdiffcite` on `GitHub <https://github.com/cmeeren/latexdiffcite/fork>`_.
 2. Clone your fork locally::
 
     git clone git@github.com:your_name_here/latexdiffcite.git

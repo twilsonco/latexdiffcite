@@ -2,7 +2,7 @@
     "ref_single_word": false,
     "bbl": {
         "regex": "\\\\bibitem\\[((?:(?!^$).)*?)\\]{%REFKEY%}",
-        "author": "%CG1%",
+        "author": "",
         "year": ""
     },
     "cmd_format": {
