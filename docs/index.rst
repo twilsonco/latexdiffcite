@@ -5,19 +5,19 @@
     :target: https://readthedocs.org/projects/latexdiffcite
     :alt: Documentation Status
 
-.. |version| image:: http://img.shields.io/pypi/v/latexdiffcite.png?style=flat
+.. |version| image:: http://img.shields.io/pypi/v/latexdiffcite.svg?style=flat
     :alt: PyPI Package latest release
     :target: https://pypi.python.org/pypi/latexdiffcite
 
-.. |downloads| image:: http://img.shields.io/pypi/dm/latexdiffcite.png?style=flat
+.. |downloads| image:: http://img.shields.io/pypi/dm/latexdiffcite.svg?style=flat
     :alt: PyPI Package monthly downloads
     :target: https://pypi.python.org/pypi/latexdiffcite
 
-.. |supported-versions| image:: https://pypip.in/py_versions/latexdiffcite/badge.png?style=flat
+.. |supported-versions| image:: https://pypip.in/py_versions/latexdiffcite/badge.svg?style=flat
     :alt: Supported versions
     :target: https://pypi.python.org/pypi/latexdiffcite
 
-.. |travis| image:: http://img.shields.io/travis/cmeeren/latexdiffcite/master.png?style=flat
+.. |travis| image:: http://img.shields.io/travis/cmeeren/latexdiffcite/master.svg?style=flat
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/cmeeren/latexdiffcite
 
@@ -33,7 +33,7 @@
     :target: https://landscape.io/github/cmeeren/latexdiffcite/master
     :alt: Code Quality Status
 
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/cmeeren/latexdiffcite/master.png?style=flat
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/cmeeren/latexdiffcite/master.svg?style=flat
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/cmeeren/latexdiffcite/
 
