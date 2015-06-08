@@ -272,7 +272,7 @@ def initiate_from_args(args):
     if os.path.isfile(default_cfile):
         log.debug('Loading config from %s', default_cfile)
         Config.load_config(default_cfile)
-    if hasattr(args, 'file_config'):
+    if args.file_config:
         log.debug('Loading config from %s', args.file_config)
         Config.load_config(args.file_config)
 
@@ -300,7 +300,6 @@ def run(args):
         run_latexdiff(Files.tex_old_tmp_path, Files.tex_new_tmp_path)
     finally:
         Files.destroy_tempfiles()
-        pass
 
 
 def read_files(ext):
@@ -309,8 +308,6 @@ def read_files(ext):
     for rev in ['old', 'new']:
         fname = getattr(Files, '{ext}_{rev}_path'.format(ext=ext, rev=rev))
         log.debug('reading %s', fname)
-        # TODO: check if the encoding is needed here - maybe we can use f.read().decode(Config.encoding)
-        # instead of io.open
         with io.open(fname, 'r', encoding=Config.encoding) as f:
             setattr(FileContents, '{ext}_{rev}'.format(ext=ext, rev=rev), f.read())
 
