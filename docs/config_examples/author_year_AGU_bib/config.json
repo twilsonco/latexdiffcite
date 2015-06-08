@@ -1,0 +1,45 @@
+{
+    "ref_single_word": false,
+    "bib": {
+        "max_authors": 2,
+        "sep_authors_first": ", ",
+        "author_serialcomma": true,
+        "sep_authors_last": " and ",
+        "et_al": " et~al."
+    },
+    "cmd_format": {
+        "citep": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "\\textit{%AUTHOR%}",
+            "sep_author_year": ", ",
+            "year": "%YEAR%",
+            "sep_same_author_year": ", ",
+            "sep_ref": "; ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        },
+        "citet": {
+            "cite_start": "",
+            "sep_prenote": " ",
+            "author": "\\textit{%AUTHOR%}",
+            "sep_author_year": " ",
+            "year": "[%YEAR%]",
+            "sep_same_author_year": ", ",
+            "sep_ref": "; ",
+            "sep_postnote": ", ",
+            "cite_end": ""
+        },
+        "cite": {
+            "cite_start": "",
+            "sep_prenote": " ",
+            "author": "\\textit{%AUTHOR%}",
+            "sep_author_year": " ",
+            "year": "[%YEAR%]",
+            "sep_same_author_year": ", ",
+            "sep_ref": "; ",
+            "sep_postnote": ", ",
+            "cite_end": ""
+        }
+    }
+}

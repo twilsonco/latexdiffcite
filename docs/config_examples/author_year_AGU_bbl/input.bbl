@@ -1,0 +1,17 @@
+\bibitem[{\textit{Foo}(2010)}]{foo2010}
+Reference info here
+
+\bibitem[{\textit{Foo and Bar}(2011{\natexlab{a}})}]{foo2011lorem}
+Reference info here
+
+\bibitem[{\textit{Foo and Bar}(2011{\natexlab{b}})}]{foo2011ipsum}
+Reference info here
+
+\bibitem[{\textit{Foo et~al.}(2011)\textit{Foo, Bar, and Baz}}]{foo2011dolor}
+Reference info here
+
+\bibitem[{\textit{Foo and Bar}(2012)}]{foo2012}
+Reference info here
+
+\bibitem[{\textit{Bar and Baz}(2013)}]{bar2013}
+Reference info here

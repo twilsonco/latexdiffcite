@@ -1,0 +1,43 @@
+{
+    "ref_single_word": false,
+    "bbl": {
+        "regex": "\\\\bibitem\\[((?:(?!^$).)*?)\\]{%REFKEY%}",
+        "author": "",
+        "year": ""
+    },
+    "cmd_format": {
+        "citep": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%CG1%",
+            "sep_author_year": "",
+            "year": "",
+            "sep_same_author_year": "",
+            "sep_ref": ", ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        },
+        "citet": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%CG1%",
+            "sep_author_year": "",
+            "year": "",
+            "sep_same_author_year": "",
+            "sep_ref": ", ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        },
+        "cite": {
+            "cite_start": "[",
+            "sep_prenote": " ",
+            "author": "%CG1%",
+            "sep_author_year": "",
+            "year": "",
+            "sep_same_author_year": "",
+            "sep_ref": ", ",
+            "sep_postnote": ", ",
+            "cite_end": "]"
+        }
+    }
+}
