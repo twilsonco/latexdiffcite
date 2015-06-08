@@ -25,7 +25,7 @@
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/cmeeren/latexdiffcite
 
-.. |codecov| image:: http://img.shields.io/codecov/c/cmeeren/latexdiffcite/master.png?style=flat
+.. |codecov| image:: http://img.shields.io/codecov/c/github/cmeeren/latexdiffcite/master.svg?style=flat
     :alt: Coverage Status
     :target: https://codecov.io/github/cmeeren/latexdiffcite
 
