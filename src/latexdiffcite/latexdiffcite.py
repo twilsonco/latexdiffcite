@@ -380,7 +380,7 @@ def get_all_ref_keys(oldnew):
 
     # find arguments of all LaTeX citation commands in document
     all_cite_commands = '|'.join(Config.cmd_format.keys())
-    args_all_commands = re.findall(r'\\(?:' + all_cite_commands + r')\s*\[?.*?\]?\s*\{(.*?)\}', remove_comments(s), flags=re.S)
+    args_all_commands = re.findall(r'\\(?:' + all_cite_commands + r')\s*(?:\[[^\]]*?\]\s*){0,2}\{(.*?)\}', remove_comments(s), flags=re.S)
 
     # for each citation command, save new references
     for args in args_all_commands:
@@ -656,7 +656,7 @@ def replace_refs_in_tex(oldnew):
     s = getattr(FileContents, 'tex_' + oldnew)
 
     # find all LaTeX citation commands in the string (exclude commented-out commands)
-    matches = re.findall(r'(\\(cite[tp]?)\s*(\[?.*?\]?)\s*\{(.*?)\})', remove_comments(s), flags=re.S)
+    matches = re.findall(r'(\\(cite[tp]?)\s*((?:\[[^\]]*?\]\s*){0,2})\{(.*?)\})', remove_comments(s), flags=re.S)
 
     # process the references for each citation command
     for full_cmd, cite_cmd, opt_args, cite_args in matches:

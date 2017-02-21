@@ -66,6 +66,7 @@ Pre- and postnote [e.g. \textit{Foo and Bar}, 2011b; \textit{Foo et al.}, 2011, 
 Postnote only [\textit{Foo}, 2010, and references therein].
 Testing spaces [pre \textit{Foo and Bar}, 2011a; \textit{Bar and Baz}, 2013, post].
 Testing commented-out stuff % \cite{notused}
+Testing command inside args [\odot$\dot{T}$ \textit{Foo}, 2010, \odot$\dot{T}$].
 Testing multi-line stuff [\textit{Foo}, 2010; \textit{Foo et al.}, 2011; \textit{Bar and Baz}, 2013]
 {ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
@@ -84,6 +85,7 @@ Pre- and postnote (e.g. \ldiffentity{\textit{Foo and Bar} \ldiffentity{2011b}}; 
 Postnote only (\ldiffentity{\textit{Foo} \ldiffentity{2010}}, and references therein).
 Testing spaces (pre \ldiffentity{\textit{Foo and Bar} \ldiffentity{2011a}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}, post).
 Testing commented-out stuff % \cite{notused}
+Testing command inside args (\odot$\dot{T}$ \ldiffentity{\textit{Foo} \ldiffentity{2010}}, \odot$\dot{T}$).
 Testing multi-line stuff (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \ldiffentity{\textit{Foo, Bar, and Baz} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}})
 {ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
@@ -101,6 +103,7 @@ Pre- and postnote [e.g. \textit{Foo and Bar}, 2011b; \textit{Foo et~al.}, 2011, 
 Postnote only [\textit{Foo}, 2010, and references therein].
 Testing spaces [pre \textit{Foo and Bar}, 2011a; \textit{Bar and Baz}, 2013, post].
 Testing commented-out stuff % \cite{notused}
+Testing command inside args [\odot$\dot{T}$ \textit{Foo}, 2010, \odot$\dot{T}$].
 Testing multi-line stuff [\textit{Foo}, 2010; \textit{Foo et~al.}, 2011; \textit{Bar and Baz}, 2013]
 {ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
@@ -119,6 +122,7 @@ Pre- and postnote (e.g. \ldiffentity{\textit{Foo and Bar} \ldiffentity{2011b}}; 
 Postnote only (\ldiffentity{\textit{Foo} \ldiffentity{2010}}, and references therein).
 Testing spaces (pre \ldiffentity{\textit{Foo and Bar} \ldiffentity{2011a}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}}, post).
 Testing commented-out stuff % \cite{notused}
+Testing command inside args (\odot$\dot{T}$ \ldiffentity{\textit{Foo} \ldiffentity{2010}}, \odot$\dot{T}$).
 Testing multi-line stuff (\ldiffentity{\textit{Foo} \ldiffentity{2010}}; \ldiffentity{\textit{Foo et~al.} \ldiffentity{2011}}; \ldiffentity{\textit{Bar and Baz} \ldiffentity{2013}})
 {ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
@@ -136,6 +140,7 @@ Pre- and postnote [e.g. Foo11b, Foo11c, and references therein].
 Postnote only [Foo10, and references therein].
 Testing spaces [pre Foo11a, Bar13, post].
 Testing commented-out stuff % \cite{notused}
+Testing command inside args [\odot$\dot{T}$ Foo10, \odot$\dot{T}$].
 Testing multi-line stuff [Foo10, Foo11c, Bar13]
 {ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
@@ -153,6 +158,7 @@ Pre- and postnote [e.g. 3, 5, and references therein].
 Postnote only [1, and references therein].
 Testing spaces [pre 2, 6, post].
 Testing commented-out stuff % \cite{notused}
+Testing command inside args [\odot$\dot{T}$ 1, \odot$\dot{T}$].
 Testing multi-line stuff [1, 5, 6]
 {ACCENTED_CHARACTERS}
 \bibliography{bibl1, bibl2}
