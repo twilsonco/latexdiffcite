@@ -7,13 +7,13 @@ Bug reports, feature suggestions and other contributions are greatly appreciated
 Short version
 =============
 
-* Submit bug reports and feature requests at `GitHub <https://github.com/cmeeren/latexdiffcite/issues>`_
+* Submit bug reports and feature requests at `GitHub <https://github.com/cmeeren/latexdiffcite/issues>`__
 * Make pull requests to the ``develop`` branch
 
 Bug reports
 ===========
 
-When `reporting a bug <https://github.com/cmeeren/latexdiffcite/issues>`_ please include:
+When `reporting a bug <https://github.com/cmeeren/latexdiffcite/issues>`__ please include:
 
 * your operating system name and version
 * any details about your local setup that might be helpful in troubleshooting
@@ -32,12 +32,12 @@ Feel free to add additional configuration examples. This should include, in the 
 * an example ``.tex`` file
 * the output `latexdiffcite` would produce after replacing citation commands
 
-Please run your JSON through a `JSON validator and formatter <http://jsonlint.com>`_ before adding it to the docs.
+Please run your JSON through a `JSON validator and formatter <http://jsonlint.com>`__ before adding it to the docs.
 
 Feature requests and feedback
 =============================
 
-The best way to send feedback is to file an issue at `GitHub <https://github.com/cmeeren/latexdiffcite/issues>`_.
+The best way to send feedback is to file an issue at `GitHub <https://github.com/cmeeren/latexdiffcite/issues>`__.
 
 If you are proposing a feature:
 
@@ -50,7 +50,7 @@ Development
 
 To set up `latexdiffcite` for local development:
 
-1. Fork `latexdiffcite` on `GitHub <https://github.com/cmeeren/latexdiffcite/fork>`_.
+1. Fork `latexdiffcite` on `GitHub <https://github.com/cmeeren/latexdiffcite/fork>`__.
 2. Clone your fork locally::
 
     git clone git@github.com:your_name_here/latexdiffcite.git
@@ -61,7 +61,7 @@ To set up `latexdiffcite` for local development:
 
    Now you can make your changes locally. If you add functionality, also add a test in ``tests/test_latexdiffcite.py``. The tests are run with ``py.test`` and can be written as normal functions (starting with ``test_``) containing a standard ``assert`` statement for testing output.
 
-4. When you're done making changes, run all the checks, doc builder and spell checker with `tox <http://tox.readthedocs.org/en/latest/install.html>`_:[1]_ ::
+4. When you're done making changes, run all the checks, doc builder and spell checker with `tox <http://tox.readthedocs.io/en/latest/install.html>`__:[1]_ ::
 
     tox
 
@@ -85,7 +85,7 @@ For merging, you should:
 3. Add yourself to ``AUTHORS.rst``.
 
 .. [1] If you don't have all the necessary python versions available locally you can rely on Travis -- it will
-       `run the tests <https://travis-ci.org/cmeeren/latexdiffcite/pull_requests>`_ for each change you add in the pull request. It will be a bit slower than testing locally, though.
+       `run the tests <https://travis-ci.org/cmeeren/latexdiffcite/pull_requests>`__ for each change you add in the pull request. It will be a bit slower than testing locally, though.
 
 Tips
 ----
