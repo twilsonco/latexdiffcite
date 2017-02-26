@@ -2,6 +2,12 @@
 Changelog
 =========
 
+
+1.0.6 (2017-02-26)
+-----------------------------------------
+
+* Fix bug where temp files has not finished writing before calling latexdiff
+
 1.0.5 (2017-02-21)
 -----------------------------------------
 
