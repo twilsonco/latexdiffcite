@@ -799,7 +799,9 @@ def write_tex_to_temp(oldnew):
     '''Writes processed file contents to temp files'''
 
     log.debug('writing to file %s', getattr(Files, 'tex_' + oldnew + '_tmp_path'))
-    getattr(Files, 'tex_' + oldnew + '_tmp_hndl').write(getattr(FileContents, 'tex_' + oldnew).encode('utf-8'))
+    fh = getattr(Files, 'tex_' + oldnew + '_tmp_hndl')
+    fh.write(getattr(FileContents, 'tex_' + oldnew).encode('utf-8'))
+    fh.flush()
 
 
 def run_latexdiff(file1, file2):
