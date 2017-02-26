@@ -15,7 +15,7 @@ import argparse
 import tempfile
 import subprocess
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 
 log = logging.getLogger(__name__)
 
