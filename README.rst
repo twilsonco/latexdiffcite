@@ -1,3 +1,12 @@
+Help wanted!
+============
+
+I lack both the time and interest to maintain and develop latexdiffcite further. Give me a holler if you want to take over.
+
+
+
+
+
 | |docs| |version| |downloads| |supported-versions|
 | |travis| |appveyor| |codecov| |landscape| |scrutinizer|
 
