@@ -22,7 +22,7 @@ I lack both the time and interest to maintain and develop latexdiffcite further.
     :alt: PyPI Package monthly downloads
     :target: https://pypi.python.org/pypi/latexdiffcite
 
-.. |supported-versions| image:: https://pypip.in/py_versions/latexdiffcite/badge.svg?style=flat
+.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/latexdiffcite.svg?style=flat
     :alt: Supported versions
     :target: https://pypi.python.org/pypi/latexdiffcite
 
