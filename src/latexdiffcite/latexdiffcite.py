@@ -532,6 +532,14 @@ def make_author_year_tokens_from_bib(oldnew):
 
     # keys = reference key, values = tuple of (%AUTHOR%, %YEAR%)
     authyear = {}
+    
+    # find author list in entry and create author string
+    author_re = re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S)
+    editor_re = re.compile(r'editor\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S)
+
+
+    # find year in entry and create year string
+    year_re = re.compile(r'\s*year\s*=\s*["{]?\s*(\d+)\s*["}]?', flags=re.IGNORECASE)
 
     # process each reference individually
     for ref in refkeys:
@@ -552,11 +560,14 @@ def make_author_year_tokens_from_bib(oldnew):
 
             # AUTHOR
 
-            # find author list in entry and create author string
-            author_re = re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S)
-
             # split into a list of all authors
-            authors = re.split('\s+and\s+', author_re.search(entry).group(1))
+            # print("entry: ",entry)
+            # print("re search: ",author_re.search(entry))
+            author_search = author_re.search(entry)
+            if author_search == None:
+                authors = re.split('\s+and\s+', editor_re.search(entry).group(1))
+            else:
+                authors = re.split('\s+and\s+', author_search.group(1))
 
             # get a list of only the surnames
             if any(',' in a for a in authors):
@@ -578,7 +589,6 @@ def make_author_year_tokens_from_bib(oldnew):
             # YEAR
 
             # find year in entry and create year string
-            year_re = re.compile(r'\s*year\s*=\s*["{]?\s*(\d+)\s*["}]?', flags=re.IGNORECASE)
             year = year_re.search(entry).group(1)
 
             # append the name and the year to the list
