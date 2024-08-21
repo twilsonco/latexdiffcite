@@ -478,8 +478,9 @@ def read_bibfile(oldnew):
     '''Reads contents of bibtex files'''
 
     # get bibtex file
-    bibarg = find_bibliography_arg(getattr(FileContents, 'tex_' + oldnew))
-    find_bibfiles(bibarg, oldnew)
+    bibargs = find_bibliography_args(getattr(FileContents, 'tex_' + oldnew))
+    for bibarg in bibargs:
+        find_bibfiles(bibarg, oldnew)
     bibfiles = getattr(Files, 'bib_' + oldnew + '_path')
 
     # read bibtex files
@@ -489,13 +490,16 @@ def read_bibfile(oldnew):
             getattr(FileContents, 'bib_' + oldnew).append(f.read())
 
 
-def find_bibliography_arg(s):
+def find_bibliography_args(s):
     '''Looks through string for \bibliography{} command and retrieves the argument'''
 
+    bibfiles = []
     log.debug('searching for \\bibliography{} entry in tex file')
-    bibfile = re.search(r'$[^%]*\\bibliography\s*{(.*?)}', s, flags=re.M).group(1)
-    log.debug('bibliography argument found: %s', bibfile)
-    return bibfile
+    bibfiles.extend(re.findall(r'^\s*\\bibliography\s*{(.*?)}', s, flags=re.M))
+    log.debug('searching for \\addbibresource{} entries in tex file')
+    bibfiles.extend(re.findall(r'^\s*\\addbibresource\s*{(.*?)}', s, flags=re.M))
+    log.debug('bibliography arguments found: %s', str(bibfiles))
+    return bibfiles
 
 
 def find_bibfiles(arg, oldnew):
