@@ -831,7 +831,7 @@ def run_latexdiff(file1, file2):
 
     args = ['latexdiff', file1, file2]
     if Config.latexdiff_args:
-        args.append(Config.latexdiff_args)
+        args.extend(Config.latexdiff_args)
     log.info('running %s', ' '.join(args))
     log.debug('sending result to %s', Files.out_path)
     with io.open(Files.out_path, 'w', encoding='utf-8') as f:
@@ -839,7 +839,7 @@ def run_latexdiff(file1, file2):
         _, stderr = process.communicate()
         ret_code = process.wait()
         if ret_code:
-            raise ValueError('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + stderr)
+            raise ValueError('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + str(stderr))
 
 
 if __name__ == '__main__':
