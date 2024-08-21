@@ -384,7 +384,7 @@ def get_all_ref_keys(oldnew):
 
     # for each citation command, save new references
     for args in args_all_commands:
-        ref_list = re.split('\s*,\s*', args)
+        ref_list = re.split(r'\s*,\s*', args)
         log.debug('references found: %s', ref_list)
         new_refs = [r for r in ref_list if r not in refkeys]
         log.debug('new references: %s', new_refs)
@@ -409,7 +409,7 @@ def get_capture_groups_from_bbl(oldnew):
     # create empty dict if bbl_contents is empty
     if not bbl_contents:
         setattr(References, 'capture_groups_' + oldnew,
-                dict(zip(getattr(References, 'refkeys_' + oldnew), [tuple()]*len(refkeys))))
+                dict(zip(getattr(References, 'refkeys_' + oldnew), [tuple()] * len(refkeys))))
         return
 
     capture_groups = {}
@@ -470,7 +470,7 @@ def replace_capture_groups(s, ref, oldnew):
     '''Replaces all capture group tokens in string'''
 
     for i, replacement in enumerate(getattr(References, 'capture_groups_' + oldnew)[ref]):
-        s = s.replace('%CG{}%'.format(i+1), replacement or '')
+        s = s.replace('%CG{}%'.format(i + 1), replacement or '')
     return s
 
 
@@ -506,7 +506,7 @@ def find_bibfiles(arg, oldnew):
     '''Searches for the bibfiles on the system'''
 
     sourcepath = os.path.dirname(getattr(Files, 'tex_' + oldnew + '_path'))
-    fnames = re.split('\s*,\s*', arg)
+    fnames = re.split(r'\s*,\s*', arg)
     for i, fname in enumerate(fnames):
         fnames[i] = fname if fname.endswith('.bib') else fname + '.bib'
 
@@ -530,19 +530,18 @@ def make_author_year_tokens_from_bib(oldnew):
     # if numeric mode (%AUTHOR% and %YEAR% not used in any fields), return empty strings
     if all('%AUTHOR%' not in fmt['author'] and '%YEAR%' not in fmt['year'] for fmt in Config.cmd_format.values()):
         log.debug('no %AUTHOR% or %YEAR% tokens detected in any fields, skipping formatting of author/year')
-        authyear = dict(zip(refkeys, [('', '')]*len(refkeys)))
+        authyear = dict(zip(refkeys, [('', '')] * len(refkeys)))
         setattr(References, 'authyear_' + oldnew, authyear)
         return
 
     # keys = reference key, values = tuple of (%AUTHOR%, %YEAR%)
     authyear = {}
-    
+
     # find author list in entry and create author string
     author_re = [re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S),
                 re.compile(r'editor\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S),
                 re.compile(r'howpublished\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S),
             ]
-
 
     # find year in entry and create year string
     year_re = re.compile(r'\s*year\s*=\s*["{]?\s*(\d+)\s*["}]?', flags=re.IGNORECASE)
@@ -573,7 +572,7 @@ def make_author_year_tokens_from_bib(oldnew):
             for author_type in author_re:
                 author_search = author_type.search(entry)
                 if author_search is not None:
-                    authors = re.split('\s+and\s+', author_search.group(1))
+                    authors = re.split(r'\s+and\s+', author_search.group(1))
                     break
             if authors == "":
                 raise NameError(f"Failed to find author/editor/etc information for {entry}")
@@ -600,7 +599,7 @@ def make_author_year_tokens_from_bib(oldnew):
             # find year in entry and create year string
             try:
                 year = year_re.search(entry).group(1)
-            except:
+            except Exception:
                 raise NameError(f"Failed to find year info for {entry}")
 
             # append the name and the year to the list
@@ -627,9 +626,9 @@ def format_authorlist(surnames):
     '''Given a list of surnames, formats a string of all surnames correctly'''
 
     n = len(surnames)
-    serialcomma = ','*(n > 2 and Config.bib['author_serialcomma'])  # serial comma if at least 3 names
-    return (('{}' + Config.bib['sep_authors_first'])*(n-2) +  # name + first-kind separator if names > 2
-            ('{}' + serialcomma + Config.bib['sep_authors_last'])*(n > 1) +   # penultimate name and last-kind separator
+    serialcomma = ',' * (n > 2 and Config.bib['author_serialcomma'])  # serial comma if at least 3 names
+    return (('{}' + Config.bib['sep_authors_first']) * (n - 2) +  # name + first-kind separator if names > 2
+            ('{}' + serialcomma + Config.bib['sep_authors_last']) * (n > 1) +   # penultimate name and last-kind separator
             '{}').format(*surnames)  # final (or only) author name
 
 
@@ -686,10 +685,10 @@ def replace_refs_in_tex(oldnew):
         log.debug('replacing %s', full_cmd)
 
         # split args to get a list of reference keys
-        refs_this = re.split('\s*,\s*', cite_args)
+        refs_this = re.split(r'\s*,\s*', cite_args)
 
         # find prenote/postnote if present
-        arg1, arg2 = re.search('(?:\[(.*?)\])?\s*(?:\[(.*?)\])?', opt_args).groups()
+        arg1, arg2 = re.search(r'(?:\[(.*?)\])?\s*(?:\[(.*?)\])?', opt_args).groups()
         if arg2 is None:
             prenote = None
             postnote = arg1
@@ -762,7 +761,7 @@ def format_refs(oldnew, replace_refs, cite_cmd, prenote, postnote):
         author = fmt['author']
         author = replace_capture_groups(author, ref, oldnew)
         author = author.replace('%AUTHOR%', authyear[ref][0])
-        author = author.replace('%NUMERIC%', str(getattr(References, 'refkeys_' + oldnew).index(ref)+1))
+        author = author.replace('%NUMERIC%', str(getattr(References, 'refkeys_' + oldnew).index(ref) + 1))
         out += author
 
         # author-year separator
