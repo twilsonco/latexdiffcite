@@ -4,7 +4,7 @@
 Author-year AGU (bib)
 =====================
 
-This configuration parses ``.bib`` files and creates written-out citations in the same style BibTeX does using the American Geophysical Union's `LaTeX Formatting Toolkit <http://publications.agu.org/author-resource-center/author-guide/text-requirements/latex-formatting-toolkit>`_.
+This configuration parses ``.bib`` files and creates written-out citations in the same style BibTeX does using the American Geophysical Union's `LaTeX Formatting Toolkit <https://www.latextemplates.com/template/american-geophysical-union>`__.
 
 The output is exactly the same as :ref:`AGU_bbl`.
 

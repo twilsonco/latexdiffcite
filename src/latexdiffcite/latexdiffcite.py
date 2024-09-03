@@ -15,7 +15,7 @@ import argparse
 import tempfile
 import subprocess
 
-__version__ = '1.0.4'
+__version__ = '1.0.6'
 
 log = logging.getLogger(__name__)
 
@@ -380,11 +380,11 @@ def get_all_ref_keys(oldnew):
 
     # find arguments of all LaTeX citation commands in document
     all_cite_commands = '|'.join(Config.cmd_format.keys())
-    args_all_commands = re.findall(r'\\(?:' + all_cite_commands + r')\s*\[?.*?\]?\s*\{(.*?)\}', remove_comments(s), flags=re.S)
+    args_all_commands = re.findall(r'\\(?:' + all_cite_commands + r')\s*(?:\[[^\]]*?\]\s*){0,2}\{(.*?)\}', remove_comments(s), flags=re.S)
 
     # for each citation command, save new references
     for args in args_all_commands:
-        ref_list = re.split('\s*,\s*', args)
+        ref_list = re.split(r'\s*,\s*', args)
         log.debug('references found: %s', ref_list)
         new_refs = [r for r in ref_list if r not in refkeys]
         log.debug('new references: %s', new_refs)
@@ -409,7 +409,7 @@ def get_capture_groups_from_bbl(oldnew):
     # create empty dict if bbl_contents is empty
     if not bbl_contents:
         setattr(References, 'capture_groups_' + oldnew,
-                dict(zip(getattr(References, 'refkeys_' + oldnew), [tuple()]*len(refkeys))))
+                dict(zip(getattr(References, 'refkeys_' + oldnew), [tuple()] * len(refkeys))))
         return
 
     capture_groups = {}
@@ -470,7 +470,7 @@ def replace_capture_groups(s, ref, oldnew):
     '''Replaces all capture group tokens in string'''
 
     for i, replacement in enumerate(getattr(References, 'capture_groups_' + oldnew)[ref]):
-        s = s.replace('%CG{}%'.format(i+1), replacement or '')
+        s = s.replace('%CG{}%'.format(i + 1), replacement or '')
     return s
 
 
@@ -478,8 +478,9 @@ def read_bibfile(oldnew):
     '''Reads contents of bibtex files'''
 
     # get bibtex file
-    bibarg = find_bibliography_arg(getattr(FileContents, 'tex_' + oldnew))
-    find_bibfiles(bibarg, oldnew)
+    bibargs = find_bibliography_args(getattr(FileContents, 'tex_' + oldnew))
+    for bibarg in bibargs:
+        find_bibfiles(bibarg, oldnew)
     bibfiles = getattr(Files, 'bib_' + oldnew + '_path')
 
     # read bibtex files
@@ -489,20 +490,23 @@ def read_bibfile(oldnew):
             getattr(FileContents, 'bib_' + oldnew).append(f.read())
 
 
-def find_bibliography_arg(s):
+def find_bibliography_args(s):
     '''Looks through string for \bibliography{} command and retrieves the argument'''
 
+    bibfiles = []
     log.debug('searching for \\bibliography{} entry in tex file')
-    bibfile = re.search(r'$[^%]*\\bibliography\s*{(.*?)}', s, flags=re.M).group(1)
-    log.debug('bibliography argument found: %s', bibfile)
-    return bibfile
+    bibfiles.extend(re.findall(r'^\s*\\bibliography\s*{(.*?)}', s, flags=re.M))
+    log.debug('searching for \\addbibresource{} entries in tex file')
+    bibfiles.extend(re.findall(r'^\s*\\addbibresource\s*{(.*?)}', s, flags=re.M))
+    log.debug('bibliography arguments found: %s', str(bibfiles))
+    return bibfiles
 
 
 def find_bibfiles(arg, oldnew):
     '''Searches for the bibfiles on the system'''
 
     sourcepath = os.path.dirname(getattr(Files, 'tex_' + oldnew + '_path'))
-    fnames = re.split('\s*,\s*', arg)
+    fnames = re.split(r'\s*,\s*', arg)
     for i, fname in enumerate(fnames):
         fnames[i] = fname if fname.endswith('.bib') else fname + '.bib'
 
@@ -526,12 +530,21 @@ def make_author_year_tokens_from_bib(oldnew):
     # if numeric mode (%AUTHOR% and %YEAR% not used in any fields), return empty strings
     if all('%AUTHOR%' not in fmt['author'] and '%YEAR%' not in fmt['year'] for fmt in Config.cmd_format.values()):
         log.debug('no %AUTHOR% or %YEAR% tokens detected in any fields, skipping formatting of author/year')
-        authyear = dict(zip(refkeys, [('', '')]*len(refkeys)))
+        authyear = dict(zip(refkeys, [('', '')] * len(refkeys)))
         setattr(References, 'authyear_' + oldnew, authyear)
         return
 
     # keys = reference key, values = tuple of (%AUTHOR%, %YEAR%)
     authyear = {}
+
+    # find author list in entry and create author string
+    author_re = [re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S),
+                re.compile(r'editor\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S),
+                re.compile(r'howpublished\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S),
+            ]
+
+    # find year in entry and create year string
+    year_re = re.compile(r'\s*year\s*=\s*["{]?\s*(\d+)\s*["}]?', flags=re.IGNORECASE)
 
     # process each reference individually
     for ref in refkeys:
@@ -552,11 +565,17 @@ def make_author_year_tokens_from_bib(oldnew):
 
             # AUTHOR
 
-            # find author list in entry and create author string
-            author_re = re.compile(r'author\s*=\s*[{"]((?:[^{}]+?|{[^}]+?})+?)[}"]', re.I | re.M | re.S)
-
             # split into a list of all authors
-            authors = re.split('\s+and\s+', author_re.search(entry).group(1))
+            # print("entry: ",entry)
+            # print("re search: ",author_re.search(entry))
+            authors = ""
+            for author_type in author_re:
+                author_search = author_type.search(entry)
+                if author_search is not None:
+                    authors = re.split(r'\s+and\s+', author_search.group(1))
+                    break
+            if authors == "":
+                raise NameError(f"Failed to find author/editor/etc information for {entry}")
 
             # get a list of only the surnames
             if any(',' in a for a in authors):
@@ -578,8 +597,10 @@ def make_author_year_tokens_from_bib(oldnew):
             # YEAR
 
             # find year in entry and create year string
-            year_re = re.compile(r'\s*year\s*=\s*["{]?\s*(\d+)\s*["}]?', flags=re.IGNORECASE)
-            year = year_re.search(entry).group(1)
+            try:
+                year = year_re.search(entry).group(1)
+            except Exception:
+                raise NameError(f"Failed to find year info for {entry}")
 
             # append the name and the year to the list
             authyear[ref] = (name, year)
@@ -605,9 +626,9 @@ def format_authorlist(surnames):
     '''Given a list of surnames, formats a string of all surnames correctly'''
 
     n = len(surnames)
-    serialcomma = ','*(n > 2 and Config.bib['author_serialcomma'])  # serial comma if at least 3 names
-    return (('{}' + Config.bib['sep_authors_first'])*(n-2) +  # name + first-kind separator if names > 2
-            ('{}' + serialcomma + Config.bib['sep_authors_last'])*(n > 1) +   # penultimate name and last-kind separator
+    serialcomma = ',' * (n > 2 and Config.bib['author_serialcomma'])  # serial comma if at least 3 names
+    return (('{}' + Config.bib['sep_authors_first']) * (n - 2) +  # name + first-kind separator if names > 2
+            ('{}' + serialcomma + Config.bib['sep_authors_last']) * (n > 1) +   # penultimate name and last-kind separator
             '{}').format(*surnames)  # final (or only) author name
 
 
@@ -656,7 +677,7 @@ def replace_refs_in_tex(oldnew):
     s = getattr(FileContents, 'tex_' + oldnew)
 
     # find all LaTeX citation commands in the string (exclude commented-out commands)
-    matches = re.findall(r'(\\(cite[tp]?)\s*(\[?.*?\]?)\s*\{(.*?)\})', remove_comments(s), flags=re.S)
+    matches = re.findall(r'(\\(cite[tp]?)\s*((?:\[[^\]]*?\]\s*){0,2})\{(.*?)\})', remove_comments(s), flags=re.S)
 
     # process the references for each citation command
     for full_cmd, cite_cmd, opt_args, cite_args in matches:
@@ -664,10 +685,10 @@ def replace_refs_in_tex(oldnew):
         log.debug('replacing %s', full_cmd)
 
         # split args to get a list of reference keys
-        refs_this = re.split('\s*,\s*', cite_args)
+        refs_this = re.split(r'\s*,\s*', cite_args)
 
         # find prenote/postnote if present
-        arg1, arg2 = re.search('(?:\[(.*?)\])?\s*(?:\[(.*?)\])?', opt_args).groups()
+        arg1, arg2 = re.search(r'(?:\[(.*?)\])?\s*(?:\[(.*?)\])?', opt_args).groups()
         if arg2 is None:
             prenote = None
             postnote = arg1
@@ -740,7 +761,7 @@ def format_refs(oldnew, replace_refs, cite_cmd, prenote, postnote):
         author = fmt['author']
         author = replace_capture_groups(author, ref, oldnew)
         author = author.replace('%AUTHOR%', authyear[ref][0])
-        author = author.replace('%NUMERIC%', str(getattr(References, 'refkeys_' + oldnew).index(ref)+1))
+        author = author.replace('%NUMERIC%', str(getattr(References, 'refkeys_' + oldnew).index(ref) + 1))
         out += author
 
         # author-year separator
@@ -799,7 +820,9 @@ def write_tex_to_temp(oldnew):
     '''Writes processed file contents to temp files'''
 
     log.debug('writing to file %s', getattr(Files, 'tex_' + oldnew + '_tmp_path'))
-    getattr(Files, 'tex_' + oldnew + '_tmp_hndl').write(getattr(FileContents, 'tex_' + oldnew).encode('utf-8'))
+    fh = getattr(Files, 'tex_' + oldnew + '_tmp_hndl')
+    fh.write(getattr(FileContents, 'tex_' + oldnew).encode('utf-8'))
+    fh.flush()
 
 
 def run_latexdiff(file1, file2):
@@ -807,7 +830,7 @@ def run_latexdiff(file1, file2):
 
     args = ['latexdiff', file1, file2]
     if Config.latexdiff_args:
-        args.append(Config.latexdiff_args)
+        args.extend(Config.latexdiff_args)
     log.info('running %s', ' '.join(args))
     log.debug('sending result to %s', Files.out_path)
     with io.open(Files.out_path, 'w', encoding='utf-8') as f:
@@ -815,7 +838,7 @@ def run_latexdiff(file1, file2):
         _, stderr = process.communicate()
         ret_code = process.wait()
         if ret_code:
-            raise ValueError('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + stderr)
+            raise ValueError('latexdiff returned with code {}. Error from latexdiff:\n\n'.format(ret_code) + str(stderr))
 
 
 if __name__ == '__main__':

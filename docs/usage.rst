@@ -18,7 +18,7 @@ To compare two files ``FILE_OLD`` and ``FILE_NEW`` on disk::
     latexdiffcite file FILE_OLD FILE_NEW
 
 Comparing revisions of a file in a git repository
-------------------------------------------------
+-------------------------------------------------
 
 To compare two revisions ``REV_OLD`` and ``REV_NEW`` of a file ``FILE`` in a git repository::
 

@@ -23,7 +23,7 @@ project = u'latexdiffcite'
 year = u'2015'
 author = u'Christer van der Meeren'
 copyright = '{0}, {1}'.format(year, author)
-version = release = u'1.0.4'
+version = release = u'1.0.6'
 
 pygments_style = 'trac'
 templates_path = ['.']
