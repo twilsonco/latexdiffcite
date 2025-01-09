@@ -19,6 +19,11 @@ __version__ = '1.0.6'
 
 log = logging.getLogger(__name__)
 
+# set lgo level and log to stdout
+log.setLevel(logging.INFO)
+log.addHandler(logging.StreamHandler())
+
+
 
 # ==============================================================================
 #  Classes to hold "global" variables during runtime
@@ -69,7 +74,7 @@ class Config(object):
                  'sep_postnote': ', ',
                  'cite_end': ''},
             'cite':
-                {'cite_start': '',
+                {'cite_start': '[',
                  'sep_prenote': ' ',
                  'author': '\\textit{%AUTHOR%}',
                  'sep_author_year': ' ',
@@ -77,7 +82,7 @@ class Config(object):
                  'sep_same_author_year': ', ',
                  'sep_ref': '; ',
                  'sep_postnote': ', ',
-                 'cite_end': ''}
+                 'cite_end': ']'}
         }
 
     @staticmethod
@@ -552,13 +557,20 @@ def make_author_year_tokens_from_bib(oldnew):
         for i, bib_contents in enumerate(getattr(FileContents, 'bib_' + oldnew)):
 
             if ref not in bib_contents:
+                log.info('Reference not found in bib file %s', ref)
                 continue
 
             log.debug('formatting %s', ref)
 
             # regex pattern to look for a whole entry - based on tips from the interwebs
             p = re.compile(r'^\s*@\s*\w+\s*\{\s*' + ref + r'\s*,.*?^\}', re.S | re.M)
-            entry = re.findall(p, bib_contents)[0]
+            entries = re.findall(p, bib_contents)
+            
+            if len(entries) == 0:
+                log.info('Reference not found in bib file %s', ref)
+                continue
+            
+            entry = entries[0]
 
             # AUTHOR
 
