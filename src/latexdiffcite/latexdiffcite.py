@@ -82,6 +82,16 @@ class Config(object):
                  'sep_same_author_year': ', ',
                  'sep_ref': '; ',
                  'sep_postnote': ', ',
+                 'cite_end': ']'},
+            'citenum':
+                {'cite_start': '[',
+                 'sep_prenote': ' ',
+                 'author': '\\textit{%AUTHOR%}',
+                 'sep_author_year': ' ',
+                 'year': '[%YEAR%]',
+                 'sep_same_author_year': ', ',
+                 'sep_ref': '; ',
+                 'sep_postnote': ', ',
                  'cite_end': ']'}
         }
 
@@ -686,7 +696,7 @@ def replace_refs_in_tex(oldnew):
     s = getattr(FileContents, 'tex_' + oldnew)
 
     # find all LaTeX citation commands in the string (exclude commented-out commands)
-    matches = re.findall(r'(\\(cite[tp]?)\s*((?:\[[^\]]*?\]\s*){0,2})\{(.*?)\})', remove_comments(s), flags=re.S)
+    matches = re.findall(r'(\\(cite[tp]?)\s*((?:\[[^\]]*?\]\s*){0,2})\{(.*?)\})', remove_comments(s), flags=re.S) + re.findall(r'(\\(citenum)\s*((?:\[[^\]]*?\]\s*){0,2})\{(.*?)\})', remove_comments(s), flags=re.S)
 
     # process the references for each citation command
     for full_cmd, cite_cmd, opt_args, cite_args in matches:
